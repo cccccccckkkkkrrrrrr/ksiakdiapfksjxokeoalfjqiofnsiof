@@ -1,0 +1,29 @@
+name: Build C++ EXE
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64 # Явно указывает сборку под 64-бит (x64)
+
+    - name: Compile C++ Code
+      run: |
+        cl.exe /EHsc main.cpp /fe:my_program.exe
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-executable-x64
+        path: my_program.exe
