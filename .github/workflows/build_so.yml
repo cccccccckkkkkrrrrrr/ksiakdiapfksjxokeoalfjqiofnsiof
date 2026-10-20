@@ -1,4 +1,4 @@
-name: Build MainHub Native Library (armeabi only)
+name: Build MainHub Native Library (Old NDK)
 
 on:
   push:
@@ -12,17 +12,18 @@ jobs:
       contents: write
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Android NDK
+    - name: Set up Android NDK (r21e)
       uses: nttld/setup-ndk@v1
       with:
-        ndk-version: r25c
+        ndk-version: r21e
     - name: Compile C Code for armeabi
       run: |
+        # Для старых NDK путь к компилятору может отличаться
         NDK_BIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
         mkdir -p "libs/Маинхаб/armeabi"
         
-        # Сборка только под armeabi (через armv7a с флагом armv5te)
-        $NDK_BIN/armv7a-linux-androideabi21-clang -shared -fPIC -march=armv5te -mfloat-abi=soft mainhub.c -o "libs/Маинхаб/armeabi/libmainhub.so" -llog
+        # Используем armv7a, но жестко задаем armv5te (в r21e это работает лучше)
+        $NDK_BIN/armv7a-linux-androideabi16-clang -shared -fPIC -march=armv5te -mfloat-abi=soft mainhub.c -o "libs/Маинхаб/armeabi/libmainhub.so" -llog
     - name: Commit and Push
       shell: bash
       env:
@@ -31,6 +32,6 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add -f "libs/Маинхаб/armeabi"
-        git commit -m "Build MainHub native library for armeabi only" || echo "No changes to commit"
+        git commit -m "Build armeabi with old NDK" || echo "No changes to commit"
         git pull --rebase origin main
         git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
