@@ -1,0 +1,37 @@
+name: Build Native SO Libraries
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Android NDK
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r25c
+    - name: Compile C Code for all architectures
+      run: |
+        mkdir -p libs/arm64-v8a libs/armeabi-v7a libs/x86 libs/x86_64
+        NDK_BIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
+        $NDK_BIN/aarch64-linux-android21-clang -shared -fPIC virus.c -o libs/arm64-v8a/libvirus.so -llog
+        $NDK_BIN/armv7a-linux-androideabi21-clang -shared -fPIC virus.c -o libs/armeabi-v7a/libvirus.so -llog
+        $NDK_BIN/i686-linux-android21-clang -shared -fPIC virus.c -o libs/x86/libvirus.so -llog
+        $NDK_BIN/x86_64-linux-android21-clang -shared -fPIC virus.c -o libs/x86_64/libvirus.so -llog
+    - name: Commit and Push SO files
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add -f libs/
+        git commit -m "Automated build: compiled .so libraries for all archs"
+        git pull --rebase origin main
+        git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
