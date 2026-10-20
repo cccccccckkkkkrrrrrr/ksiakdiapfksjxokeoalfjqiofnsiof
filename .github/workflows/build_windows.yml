@@ -1,0 +1,42 @@
+name: Build Windows EXE (x32 and x64)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install MinGW x64 and x32
+      run: |
+        choco install mingw -y
+        choco install mingw --x86 -y
+        refreshenv
+
+    - name: Compile x64 EXE
+      run: |
+        C:\ProgramData\chocolatey\bin\x86_64-w64-mingw32-g++.exe -c mainhub_win.cpp -o mainhub_x64.o
+        C:\ProgramData\chocolatey\bin\x86_64-w64-mingw32-windres.exe resource.rc -O coff -o resource_x64.res
+        C:\ProgramData\chocolatey\bin\x86_64-w64-mingw32-g++.exe mainhub_x64.o resource_x64.res -o "My Horror Android 5 Windows Remake x64.exe" -lgdiplus -lwinmm -lcomctl32 -mwindows -static-libgcc -static-libstdc++
+
+    - name: Compile x32 EXE
+      run: |
+        C:\ProgramData\chocolatey\bin\i686-w64-mingw32-g++.exe -c mainhub_win.cpp -o mainhub_x32.o
+        C:\ProgramData\chocolatey\bin\i686-w64-mingw32-windres.exe resource.rc -O coff -o resource_x32.res
+        C:\ProgramData\chocolatey\bin\i686-w64-mingw32-g++.exe mainhub_x32.o resource_x32.res -o "My Horror Android 5 Windows Remake x32.exe" -lgdiplus -lwinmm -lcomctl32 -mwindows -static-libgcc -static-libstdc++
+
+    - name: Commit and Push EXEs
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add "My Horror Android 5 Windows Remake x32.exe" "My Horror Android 5 Windows Remake x64.exe"
+        git commit -m "Build Windows EXEs (x32 and x64) with WAV" || echo "No changes to commit"
+        git pull --rebase origin main
+        git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
