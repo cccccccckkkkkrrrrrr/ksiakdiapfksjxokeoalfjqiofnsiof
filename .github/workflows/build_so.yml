@@ -19,10 +19,7 @@ jobs:
     - name: Compile C Code
       run: |
         NDK_BIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
-        mkdir -p "libs/Маинхаб/armeabi" "libs/Маинхаб/armeabi-v7a" "libs/Маинхаб/arm64-v8a" "libs/Маинхаб/x86" "libs/Маинхаб/x86_32" "libs/Маинхаб/x86_64"
-        
-        # armeabi (ARMv5)
-        $NDK_BIN/armv5te-linux-androideabi21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/armeabi/libmainhub.so" -llog
+        mkdir -p "libs/Маинхаб/armeabi-v7a" "libs/Маинхаб/arm64-v8a" "libs/Маинхаб/x86" "libs/Маинхаб/x86_64"
         
         # armeabi-v7a
         $NDK_BIN/armv7a-linux-androideabi21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/armeabi-v7a/libmainhub.so" -llog
@@ -32,9 +29,6 @@ jobs:
         
         # x86 (32-bit)
         $NDK_BIN/i686-linux-android21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/x86/libmainhub.so" -llog
-        
-        # x86_32 (дубль для совместимости)
-        $NDK_BIN/i686-linux-android21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/x86_32/libmainhub.so" -llog
         
         # x86_64
         $NDK_BIN/x86_64-linux-android21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/x86_64/libmainhub.so" -llog
