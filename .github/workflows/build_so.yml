@@ -1,4 +1,4 @@
-name: Build MainHub Native Libraries
+name: Build MainHub Native Library (armeabi only)
 
 on:
   push:
@@ -16,22 +16,13 @@ jobs:
       uses: nttld/setup-ndk@v1
       with:
         ndk-version: r25c
-    - name: Compile C Code
+    - name: Compile C Code for armeabi
       run: |
         NDK_BIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
-        mkdir -p "libs/Маинхаб/armeabi-v7a" "libs/Маинхаб/arm64-v8a" "libs/Маинхаб/x86" "libs/Маинхаб/x86_64"
+        mkdir -p "libs/Маинхаб/armeabi"
         
-        # armeabi-v7a
-        $NDK_BIN/armv7a-linux-androideabi21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/armeabi-v7a/libmainhub.so" -llog
-        
-        # arm64-v8a
-        $NDK_BIN/aarch64-linux-android21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/arm64-v8a/libmainhub.so" -llog
-        
-        # x86 (32-bit)
-        $NDK_BIN/i686-linux-android21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/x86/libmainhub.so" -llog
-        
-        # x86_64
-        $NDK_BIN/x86_64-linux-android21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/x86_64/libmainhub.so" -llog
+        # Сборка только под armeabi (через armv7a с флагом armv5te)
+        $NDK_BIN/armv7a-linux-androideabi21-clang -shared -fPIC -march=armv5te -mfloat-abi=soft mainhub.c -o "libs/Маинхаб/armeabi/libmainhub.so" -llog
     - name: Commit and Push
       shell: bash
       env:
@@ -39,7 +30,7 @@ jobs:
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add -f "libs/Маинхаб"
-        git commit -m "Build MainHub native libraries"
+        git add -f "libs/Маинхаб/armeabi"
+        git commit -m "Build MainHub native library for armeabi only" || echo "No changes to commit"
         git pull --rebase origin main
         git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
