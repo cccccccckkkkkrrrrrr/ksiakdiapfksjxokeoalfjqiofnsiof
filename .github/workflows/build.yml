@@ -1,0 +1,23 @@
+name: Build C++ EXE
+
+on:
+  workflow_dispatch: # Позволяет запускать сборку вручную кнопкой
+
+jobs:
+  build:
+    runs-on: windows-latest # GitHub запускает чистую Windows
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4 # Скачивает ваш main.cpp на вирт. машину
+
+    - name: Compile C++ Code
+      run: |
+        g++ main.cpp -o program.exe
+      # g++ установлен на серверах GitHub по умолчанию
+
+    - name: Upload EXE Artifact
+      uses: actions/artifacts@v4
+      with:
+        name: my-windows-program # Имя архива для скачивания
+        path: program.exe # Какой файл забрать
