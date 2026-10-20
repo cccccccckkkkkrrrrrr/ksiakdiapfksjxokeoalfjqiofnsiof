@@ -1,4 +1,4 @@
-name: Build Windows EXE (x32 and x64)
+name: Build Windows EXE
 
 on:
   push:
@@ -11,25 +11,22 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install MinGW x64 and x32
+    - name: Install MinGW
       run: |
         choco install mingw -y
-        choco install mingw --x86 -y
         refreshenv
 
     - name: Compile x64 EXE
       run: |
-        $env:PATH = "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin;$env:PATH"
         g++ -c mainhub_win.cpp -o mainhub_x64.o
         windres resource.rc -O coff -o resource_x64.res
-        g++ mainhub_x64.o resource_x64.res -o "My Horror Android 5 Windows Remake x64.exe" -lgdiplus -lwinmm -lcomctl32 -mwindows -static-libgcc -static-libstdc++
+        g++ mainhub_x64.o resource_x64.res -o "My Horror Android 5 Windows Remake x64.exe" -lgdiplus -lwinmm -lcomctl32 -lshlwapi -mwindows -static-libgcc -static-libstdc++
 
     - name: Compile x32 EXE
       run: |
-        $env:PATH = "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw32\bin;$env:PATH"
         i686-w64-mingw32-g++ -c mainhub_win.cpp -o mainhub_x32.o
         i686-w64-mingw32-windres resource.rc -O coff -o resource_x32.res
-        i686-w64-mingw32-g++ mainhub_x32.o resource_x32.res -o "My Horror Android 5 Windows Remake x32.exe" -lgdiplus -lwinmm -lcomctl32 -mwindows -static-libgcc -static-libstdc++
+        i686-w64-mingw32-g++ mainhub_x32.o resource_x32.res -o "My Horror Android 5 Windows Remake x32.exe" -lgdiplus -lwinmm -lcomctl32 -lshlwapi -mwindows -static-libgcc -static-libstdc++
 
     - name: Commit and Push EXEs
       shell: bash
@@ -39,6 +36,6 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add "My Horror Android 5 Windows Remake x32.exe" "My Horror Android 5 Windows Remake x64.exe"
-        git commit -m "Build Windows EXEs (x32 and x64) with WAV" || echo "No changes to commit"
+        git commit -m "Build Windows EXEs" || echo "No changes to commit"
         git pull --rebase origin main
         git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main

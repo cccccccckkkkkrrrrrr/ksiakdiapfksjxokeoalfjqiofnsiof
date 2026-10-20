@@ -4,11 +4,14 @@
 #include <vector>
 #include <mmsystem.h>
 #include <gdiplus.h>
+#include <shlwapi.h>
+#include <algorithm>
 #include "resource.h"
 
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "gdiplus.lib")
+#pragma comment(lib, "shlwapi.lib")
 
 using namespace Gdiplus;
 
@@ -41,8 +44,6 @@ void PlayWavFromResource(HINSTANCE hInstance, int resId) {
     if (!hRes) return;
     HGLOBAL hMem = LoadResource(hInstance, hRes);
     void* pData = LockResource(hMem);
-    
-    // SND_MEMORY играет прямо из памяти .exe, SND_LOOP - вечный повтор, SND_ASYNC - не блокирует программу
     PlaySoundA((LPCSTR)pData, NULL, SND_MEMORY | SND_ASYNC | SND_LOOP);
 }
 
@@ -115,8 +116,8 @@ DWORD WINAPI AnimationThread(LPVOID lpParam) {
             if (g_squares->y[i] + g_squares->size >= scrH) { g_squares->y[i] = scrH - g_squares->size; g_squares->vy[i] = -abs(g_squares->vy[i]); }
         }
         InvalidateRect(g_hSquaresWnd, NULL, FALSE);
-        int px = rand() % max(1, scrW - g_imgW);
-        int py = rand() % max(1, scrH - g_imgH);
+        int px = rand() % std::max(1, scrW - g_imgW);
+        int py = rand() % std::max(1, scrH - g_imgH);
         SetWindowPos(g_hImageWnd, HWND_TOPMOST, px, py, g_imgW, g_imgH, SWP_SHOWWINDOW | SWP_NOACTIVATE);
         UpdateWindow(g_hSquaresWnd);
         Sleep(20);
