@@ -19,15 +19,17 @@ jobs:
 
     - name: Compile x64 EXE
       run: |
-        C:\ProgramData\chocolatey\bin\x86_64-w64-mingw32-g++.exe -c mainhub_win.cpp -o mainhub_x64.o
-        C:\ProgramData\chocolatey\bin\x86_64-w64-mingw32-windres.exe resource.rc -O coff -o resource_x64.res
-        C:\ProgramData\chocolatey\bin\x86_64-w64-mingw32-g++.exe mainhub_x64.o resource_x64.res -o "My Horror Android 5 Windows Remake x64.exe" -lgdiplus -lwinmm -lcomctl32 -mwindows -static-libgcc -static-libstdc++
+        $env:PATH = "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64\bin;$env:PATH"
+        g++ -c mainhub_win.cpp -o mainhub_x64.o
+        windres resource.rc -O coff -o resource_x64.res
+        g++ mainhub_x64.o resource_x64.res -o "My Horror Android 5 Windows Remake x64.exe" -lgdiplus -lwinmm -lcomctl32 -mwindows -static-libgcc -static-libstdc++
 
     - name: Compile x32 EXE
       run: |
-        C:\ProgramData\chocolatey\bin\i686-w64-mingw32-g++.exe -c mainhub_win.cpp -o mainhub_x32.o
-        C:\ProgramData\chocolatey\bin\i686-w64-mingw32-windres.exe resource.rc -O coff -o resource_x32.res
-        C:\ProgramData\chocolatey\bin\i686-w64-mingw32-g++.exe mainhub_x32.o resource_x32.res -o "My Horror Android 5 Windows Remake x32.exe" -lgdiplus -lwinmm -lcomctl32 -mwindows -static-libgcc -static-libstdc++
+        $env:PATH = "C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw32\bin;$env:PATH"
+        i686-w64-mingw32-g++ -c mainhub_win.cpp -o mainhub_x32.o
+        i686-w64-mingw32-windres resource.rc -O coff -o resource_x32.res
+        i686-w64-mingw32-g++ mainhub_x32.o resource_x32.res -o "My Horror Android 5 Windows Remake x32.exe" -lgdiplus -lwinmm -lcomctl32 -mwindows -static-libgcc -static-libstdc++
 
     - name: Commit and Push EXEs
       shell: bash
