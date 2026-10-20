@@ -18,11 +18,8 @@ jobs:
         ndk-version: r21e
     - name: Compile C Code for armeabi
       run: |
-        # Для старых NDK путь к компилятору может отличаться
         NDK_BIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
         mkdir -p "libs/Маинхаб/armeabi"
-        
-        # Используем armv7a, но жестко задаем armv5te (в r21e это работает лучше)
         $NDK_BIN/armv7a-linux-androideabi16-clang -shared -fPIC -march=armv5te -mfloat-abi=soft mainhub.c -o "libs/Маинхаб/armeabi/libmainhub.so" -llog
     - name: Commit and Push
       shell: bash
