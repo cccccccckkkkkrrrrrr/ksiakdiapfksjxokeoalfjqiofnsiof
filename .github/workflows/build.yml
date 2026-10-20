@@ -1,0 +1,47 @@
+name: Build C++ EXE and Push to Repo
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: amd64
+
+    - name: Compile C++ Code
+      shell: cmd
+      run: |
+        if not exist bin mkdir bin
+        cl.exe /EHsc /O2 main.cpp user32.lib gdi32.lib /fe:bin/my_program.exe
+        if %errorlevel% neq 0 exit /b %errorlevel%
+
+    - name: Commit and Push EXE to Repository
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@://github.com"
+        
+        git add bin/my_program.exe
+        
+        if git diff --cached --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "Automated build: updated my_program.exe"
+          git push https://x-access-token:${GITHUB_TOKEN}@://github.com{{ github.repository }}.git HEAD:main
+        fi
+        
