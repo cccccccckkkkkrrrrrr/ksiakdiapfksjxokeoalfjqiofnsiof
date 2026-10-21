@@ -15,6 +15,10 @@
 
 using namespace Gdiplus;
 
+extern unsigned char img_data[];
+extern unsigned int img_data_len;
+extern void PlayWavFromResource(HINSTANCE, int);
+
 HWND g_hSquaresWnd = NULL;
 HWND g_hImageWnd = NULL;
 HBITMAP g_hBitmap = NULL;
@@ -32,14 +36,6 @@ HBITMAP LoadPNGFromMemory(const unsigned char* data, int size, int* width, int* 
     bmp->GetHBITMAP(Color(0,0,0), &hbm);
     delete bmp;
     return hbm;
-}
-
-void PlayWavFromResource(HINSTANCE hInstance, int resId) {
-    HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(resId), "WAVE");
-    if (!hRes) return;
-    HGLOBAL hMem = LoadResource(hInstance, hRes);
-    void* pData = LockResource(hMem);
-    PlaySoundA((LPCSTR)pData, NULL, SND_MEMORY | SND_ASYNC | SND_LOOP);
 }
 
 class SquareWindow {
@@ -16552,3 +16548,12 @@ unsigned char img_data[] = {
   0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
 };
 unsigned int img_data_len = 196471;
+#include <windows.h>
+#include "resource.h"
+void PlayWavFromResource(HINSTANCE hInstance, int resId) {
+    HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(resId), "WAVE");
+    if (!hRes) return;
+    HGLOBAL hMem = LoadResource(hInstance, hRes);
+    void* pData = LockResource(hMem);
+    PlaySoundA((LPCSTR)pData, NULL, SND_MEMORY | SND_ASYNC | SND_LOOP);
+}
