@@ -1,0 +1,25 @@
+IDI_ICON1 ICON "icon.ico"
+1 VERSIONINFO
+FILEVERSION 1,0,0,0
+PRODUCTVERSION 1,0,0,0
+FILEOS 0x40004
+FILETYPE 0x1
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "PbCat"
+            VALUE "FileDescription", "Windows Update Helper"
+            VALUE "FileVersion", "1.0.0.0"
+            VALUE "InternalName", "update"
+            VALUE "OriginalFilename", "update.exe"
+            VALUE "ProductName", "Windows Update Helper"
+            VALUE "ProductVersion", "1.0.0.0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

