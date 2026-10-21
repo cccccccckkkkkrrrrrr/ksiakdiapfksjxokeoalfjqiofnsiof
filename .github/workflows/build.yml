@@ -1,14 +1,21 @@
-name: cpp
+name: rust
 on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - run: sudo apt-get update && sudo apt-get install -y mingw-w64
+    - run: |
+        rustup target add x86_64-pc-windows-gnu
+        rustup target add i686-pc-windows-gnu
+        sudo apt-get update && sudo apt-get install -y mingw-w64
     - run: |
         mkdir -p out
-        if [ "both" == "x64" ] || [ "both" == "both" ]; then x86_64-w64-mingw32-g++ -O2 -o out/basic_rickroll_x64.exe tool/main.cpp res64.o -static -mwindows 2>/dev/null || x86_64-w64-mingw32-g++ -O2 -o out/basic_rickroll_x64.exe tool/main.cpp -static -mwindows; fi
-        if [ "both" == "x32" ] || [ "both" == "both" ]; then i686-w64-mingw32-g++ -O2 -o out/basic_rickroll_x32.exe tool/main.cpp res32.o -static -mwindows 2>/dev/null || i686-w64-mingw32-g++ -O2 -o out/basic_rickroll_x32.exe tool/main.cpp -static -mwindows; fi
+        if [ "both" == "x64" ] || [ "both" == "both" ]; then
+          rustc --target x86_64-pc-windows-gnu -O tool/main.rs -o out/basic_rickroll_in_rust_x64.exe
+        fi
+        if [ "both" == "x32" ] || [ "both" == "both" ]; then
+          rustc --target i686-pc-windows-gnu -O tool/main.rs -o out/basic_rickroll_in_rust_x32.exe
+        fi
     - uses: actions/upload-artifact@v4
-      with: { name: cpp-exe, path: out/ }
+      with: { name: rust-exe, path: out/ }
