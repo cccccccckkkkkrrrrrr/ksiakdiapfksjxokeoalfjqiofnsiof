@@ -35,7 +35,7 @@ HBITMAP LoadPNGFromMemory(const unsigned char* data, int size, int* width, int* 
 }
 
 void PlayWavFromResource(HINSTANCE hInstance, int resId) {
-    HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(resId), L"WAVE");
+    HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(resId), "WAVE");
     if (!hRes) return;
     HGLOBAL hMem = LoadResource(hInstance, hRes);
     void* pData = LockResource(hMem);
