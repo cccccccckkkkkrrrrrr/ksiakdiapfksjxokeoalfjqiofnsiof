@@ -1,4 +1,4 @@
-name: Build MainHub Native Library (mips only)
+name: Build Multi-Decompiler APK
 
 on:
   push:
@@ -8,36 +8,23 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
     - uses: actions/checkout@v4
 
-    - name: Set up Android NDK (r21e)
-      id: setup-ndk
-      uses: nttld/setup-ndk@v1
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
       with:
-        ndk-version: r21e
+        java-version: '17'
+        distribution: 'temurin'
 
-    - name: Compile C Code for mips and mips64
+    - name: Build with Gradle
       run: |
-        NDK_BIN="${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin"
-        mkdir -p "libs/Маинхаб/mips" "libs/Маинхаб/mips64"
-        
-        # mips
-        $NDK_BIN/mipsel-linux-android16-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/mips/libmainhub.so" -llog || true
-        
-        # mips64
-        $NDK_BIN/mips64el-linux-android21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/mips64/libmainhub.so" -llog || true
+        cd mltdcm
+        gradle wrapper --gradle-version 8.2
+        ./gradlew assembleDebug
 
-    - name: Commit and Push Native Libraries
-      shell: bash
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        git config --global user.name "github-actions[bot]"
-        git config --global user.email "github-actions[bot]@users.noreply.github.com"
-        git add -f "libs/Маинхаб"
-        git commit -m "Build MainHub native library for mips and mips64" || echo "No changes to commit"
-        git pull --rebase origin main
-        git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: Multi-Decompiler-APK
+        path: mltdcm/app/build/outputs/apk/debug/app-debug.apk

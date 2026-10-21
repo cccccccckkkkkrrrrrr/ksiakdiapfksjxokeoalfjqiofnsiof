@@ -1,0 +1,170 @@
+﻿2026-10-21T08:15:00.4930088Z Current runner version: '2.338.0'
+2026-10-21T08:15:00.4945995Z ##[group]Runner Image Provisioner
+2026-10-21T08:15:00.4946481Z Hosted Compute Agent
+2026-10-21T08:15:00.4946863Z Version: 20261012.601
+2026-10-21T08:15:00.4947270Z Commit: f3dc54e1fb89da6852db922499a0233137369e1d
+2026-10-21T08:15:00.4947677Z Build Date: 2026-10-12T17:48:21Z
+2026-10-21T08:15:00.4948126Z Worker ID: {dea315b9-862e-4792-924f-7ef6be8efcee}
+2026-10-21T08:15:00.4948521Z Region: centralus
+2026-10-21T08:15:00.4948861Z Cloud: Azure
+2026-10-21T08:15:00.4949207Z ##[endgroup]
+2026-10-21T08:15:00.4949904Z ##[group]Operating System
+2026-10-21T08:15:00.4950286Z Ubuntu
+2026-10-21T08:15:00.4950688Z 24.04.5
+2026-10-21T08:15:00.4950978Z LTS
+2026-10-21T08:15:00.4951346Z ##[endgroup]
+2026-10-21T08:15:00.4951784Z ##[group]Runner Image
+2026-10-21T08:15:00.4952175Z Image: ubuntu-24.04
+2026-10-21T08:15:00.4952497Z Version: 20261012.334.1
+2026-10-21T08:15:00.4953260Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20261012.334/images/ubuntu/Ubuntu2404-Readme.md
+2026-10-21T08:15:00.4954143Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20261012.334
+2026-10-21T08:15:00.4954705Z ##[endgroup]
+2026-10-21T08:15:00.4955308Z ##[group]GITHUB_TOKEN Permissions
+2026-10-21T08:15:00.4956856Z Contents: write
+2026-10-21T08:15:00.4957189Z Metadata: read
+2026-10-21T08:15:00.4957493Z ##[endgroup]
+2026-10-21T08:15:00.4958772Z Secret source: Actions
+2026-10-21T08:15:00.4959284Z Cache mode: write
+2026-10-21T08:15:00.4959837Z Prepare workflow directory
+2026-10-21T08:15:00.5156441Z Prepare all required actions
+2026-10-21T08:15:00.5186098Z Getting action download info
+2026-10-21T08:15:00.7668605Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+2026-10-21T08:15:00.8461017Z Download action repository 'nttld/setup-ndk@v1' (SHA:ed92fe6cadad69be94a966a7ee3271275e62f779)
+2026-10-21T08:15:01.2860138Z Complete job name: build
+2026-10-21T08:15:01.3279709Z ##[group]Run actions/checkout@v4
+2026-10-21T08:15:01.3280106Z with:
+2026-10-21T08:15:01.3280420Z   repository: cccccccckkkkkrrrrrr/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:15:01.3282565Z   token: ***
+2026-10-21T08:15:01.3282791Z   ssh-strict: true
+2026-10-21T08:15:01.3283020Z   ssh-user: git
+2026-10-21T08:15:01.3283256Z   persist-credentials: true
+2026-10-21T08:15:01.3283516Z   clean: true
+2026-10-21T08:15:01.3283757Z   sparse-checkout-cone-mode: true
+2026-10-21T08:15:01.3284035Z   fetch-depth: 1
+2026-10-21T08:15:01.3284266Z   fetch-tags: false
+2026-10-21T08:15:01.3284500Z   show-progress: true
+2026-10-21T08:15:01.3284738Z   lfs: false
+2026-10-21T08:15:01.3284957Z   submodules: false
+2026-10-21T08:15:01.3285196Z   set-safe-directory: true
+2026-10-21T08:15:01.3285466Z   allow-unsafe-pr-checkout: false
+2026-10-21T08:15:01.3285804Z ##[endgroup]
+2026-10-21T08:15:01.3939581Z Syncing repository: cccccccckkkkkrrrrrr/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:15:01.3940946Z ##[group]Getting Git version info
+2026-10-21T08:15:01.3941684Z Working directory is '/home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof'
+2026-10-21T08:15:01.3942455Z [command]/usr/bin/git version
+2026-10-21T08:15:01.4016596Z git version 2.55.0
+2026-10-21T08:15:01.4029818Z ##[endgroup]
+2026-10-21T08:15:01.4039657Z Temporarily overriding HOME='/home/runner/work/_temp/28ff353a-4a13-4d29-8ec6-94c90abcbee5' before making global git config changes
+2026-10-21T08:15:01.4040951Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-21T08:15:01.4043324Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:15:01.4086197Z Deleting the contents of '/home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof'
+2026-10-21T08:15:01.4089113Z ##[group]Initializing the repository
+2026-10-21T08:15:01.4092220Z [command]/usr/bin/git init /home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:15:01.4189452Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-21T08:15:01.4190254Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-21T08:15:01.4191091Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-21T08:15:01.4193927Z hint: call:
+2026-10-21T08:15:01.4194152Z hint:
+2026-10-21T08:15:01.4194446Z hint: 	git config --global init.defaultBranch <name>
+2026-10-21T08:15:01.4194891Z hint:
+2026-10-21T08:15:01.4195376Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-21T08:15:01.4196065Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-21T08:15:01.4196642Z hint:
+2026-10-21T08:15:01.4196867Z hint: 	git branch -m <name>
+2026-10-21T08:15:01.4197117Z hint:
+2026-10-21T08:15:01.4197480Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-21T08:15:01.4198162Z Initialized empty Git repository in /home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof/.git/
+2026-10-21T08:15:01.4200673Z [command]/usr/bin/git remote add origin https://github.com/cccccccckkkkkrrrrrr/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:15:01.4264970Z ##[endgroup]
+2026-10-21T08:15:01.4265415Z ##[group]Disabling automatic garbage collection
+2026-10-21T08:15:01.4265780Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-21T08:15:01.4298655Z ##[endgroup]
+2026-10-21T08:15:01.4299173Z ##[group]Setting up auth
+2026-10-21T08:15:01.4299670Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-21T08:15:01.4325984Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-21T08:15:01.4606245Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-21T08:15:01.4633381Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-21T08:15:01.4805385Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-21T08:15:01.4832295Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-21T08:15:01.4994017Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-21T08:15:01.5048571Z ##[endgroup]
+2026-10-21T08:15:01.5049118Z ##[group]Fetching the repository
+2026-10-21T08:15:01.5054528Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +49afdab764ae613d2a342b36414079c1b7a825bf:refs/remotes/origin/main
+2026-10-21T08:15:01.8692579Z From https://github.com/cccccccckkkkkrrrrrr/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:15:01.8694691Z  * [new ref]         49afdab764ae613d2a342b36414079c1b7a825bf -> origin/main
+2026-10-21T08:15:01.8695999Z ##[endgroup]
+2026-10-21T08:15:01.8696478Z ##[group]Determining the checkout info
+2026-10-21T08:15:01.8697859Z ##[endgroup]
+2026-10-21T08:15:01.8702588Z [command]/usr/bin/git sparse-checkout disable
+2026-10-21T08:15:01.8747707Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-21T08:15:01.8773522Z ##[group]Checking out the ref
+2026-10-21T08:15:01.8781033Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-21T08:15:01.8834733Z Switched to a new branch 'main'
+2026-10-21T08:15:01.8839384Z branch 'main' set up to track 'origin/main'.
+2026-10-21T08:15:01.8843225Z ##[endgroup]
+2026-10-21T08:15:01.8875743Z [command]/usr/bin/git log -1 --format=%H
+2026-10-21T08:15:01.8896243Z 49afdab764ae613d2a342b36414079c1b7a825bf
+2026-10-21T08:15:01.9063604Z ##[group]Run nttld/setup-ndk@v1
+2026-10-21T08:15:01.9063903Z with:
+2026-10-21T08:15:01.9064261Z   ndk-version: r21e
+2026-10-21T08:15:01.9064495Z   add-to-path: true
+2026-10-21T08:15:01.9064730Z   link-to-sdk: false
+2026-10-21T08:15:01.9064966Z   local-cache: false
+2026-10-21T08:15:01.9065199Z ##[endgroup]
+2026-10-21T08:15:01.9705328Z Attempting to download r21e...
+2026-10-21T08:15:19.1159742Z Extracting...
+2026-10-21T08:15:19.1181394Z [command]/usr/bin/unzip -o -q /home/runner/work/_temp/8f1dd88f-185b-4713-ad30-e689d89e6b90
+2026-10-21T08:15:40.6127040Z Adding to the tool cache...
+2026-10-21T08:16:04.8397665Z Done
+2026-10-21T08:16:04.8398491Z Added to path
+2026-10-21T08:16:04.8399035Z Detecting full version...
+2026-10-21T08:16:04.8604949Z ##[group]Run NDK_BIN="/opt/hostedtoolcache/ndk/r21e/x64/toolchains/llvm/prebuilt/linux-x86_64/bin"
+2026-10-21T08:16:04.8605400Z [36;1mNDK_BIN="/opt/hostedtoolcache/ndk/r21e/x64/toolchains/llvm/prebuilt/linux-x86_64/bin"[0m
+2026-10-21T08:16:04.8605734Z [36;1mmkdir -p "libs/Маинхаб/mips" "libs/Маинхаб/mips64"[0m
+2026-10-21T08:16:04.8605965Z [36;1m[0m
+2026-10-21T08:16:04.8606078Z [36;1m# mips[0m
+2026-10-21T08:16:04.8606371Z [36;1m$NDK_BIN/mipsel-linux-android16-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/mips/libmainhub.so" -llog || true[0m
+2026-10-21T08:16:04.8606679Z [36;1m[0m
+2026-10-21T08:16:04.8606787Z [36;1m# mips64[0m
+2026-10-21T08:16:04.8607056Z [36;1m$NDK_BIN/mips64el-linux-android21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/mips64/libmainhub.so" -llog || true[0m
+2026-10-21T08:16:04.8828978Z shell: /usr/bin/bash -e {0}
+2026-10-21T08:16:04.8829149Z ##[endgroup]
+2026-10-21T08:16:04.8920859Z /home/runner/work/_temp/6d33e258-6ed7-49ab-8d3f-7a110396f349.sh: line 5: /opt/hostedtoolcache/ndk/r21e/x64/toolchains/llvm/prebuilt/linux-x86_64/bin/mipsel-linux-android16-clang: No such file or directory
+2026-10-21T08:16:04.8924149Z /home/runner/work/_temp/6d33e258-6ed7-49ab-8d3f-7a110396f349.sh: line 8: /opt/hostedtoolcache/ndk/r21e/x64/toolchains/llvm/prebuilt/linux-x86_64/bin/mips64el-linux-android21-clang: No such file or directory
+2026-10-21T08:16:04.9015574Z ##[group]Run git config --global user.name "github-actions[bot]"
+2026-10-21T08:16:04.9015858Z [36;1mgit config --global user.name "github-actions[bot]"[0m
+2026-10-21T08:16:04.9016127Z [36;1mgit config --global user.email "github-actions[bot]@users.noreply.github.com"[0m
+2026-10-21T08:16:04.9016375Z [36;1mgit add -f "libs/Маинхаб"[0m
+2026-10-21T08:16:04.9016635Z [36;1mgit commit -m "Build MainHub native library for mips and mips64" || echo "No changes to commit"[0m
+2026-10-21T08:16:04.9016899Z [36;1mgit pull --rebase origin main[0m
+2026-10-21T08:16:04.9017274Z [36;1mgit push https://x-access-token:${GITHUB_TOKEN}@github.com/cccccccckkkkkrrrrrr/ksiakdiapfksjxokeoalfjqiofnsiof.git HEAD:main[0m
+2026-10-21T08:16:04.9066212Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-10-21T08:16:04.9066409Z env:
+2026-10-21T08:16:04.9067932Z   GITHUB_TOKEN: ***
+2026-10-21T08:16:04.9068065Z ##[endgroup]
+2026-10-21T08:16:04.9195456Z On branch main
+2026-10-21T08:16:04.9195774Z Your branch is up to date with 'origin/main'.
+2026-10-21T08:16:04.9195968Z 
+2026-10-21T08:16:04.9196187Z nothing to commit, working tree clean
+2026-10-21T08:16:04.9198831Z No changes to commit
+2026-10-21T08:16:05.2014465Z From https://github.com/cccccccckkkkkrrrrrr/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:16:05.2014907Z  * branch            main       -> FETCH_HEAD
+2026-10-21T08:16:05.2060455Z Already up to date.
+2026-10-21T08:16:05.4975866Z Everything up-to-date
+2026-10-21T08:16:05.5077586Z Post job cleanup.
+2026-10-21T08:16:05.5633938Z [command]/usr/bin/git version
+2026-10-21T08:16:05.5670188Z git version 2.55.0
+2026-10-21T08:16:05.5691215Z Copying '/home/runner/.gitconfig' to '/home/runner/work/_temp/499172a6-7386-4c7b-8166-4c31c44c747f/.gitconfig'
+2026-10-21T08:16:05.5699255Z Temporarily overriding HOME='/home/runner/work/_temp/499172a6-7386-4c7b-8166-4c31c44c747f' before making global git config changes
+2026-10-21T08:16:05.5700306Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-21T08:16:05.5702772Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:16:05.5736387Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-21T08:16:05.5764269Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-21T08:16:05.5968681Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-21T08:16:05.5991768Z http.https://github.com/.extraheader
+2026-10-21T08:16:05.6000362Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-10-21T08:16:05.6030475Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-21T08:16:05.6227652Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-21T08:16:05.6258354Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-21T08:16:05.6558386Z Cleaning up orphan processes
+2026-10-21T08:16:05.6760200Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

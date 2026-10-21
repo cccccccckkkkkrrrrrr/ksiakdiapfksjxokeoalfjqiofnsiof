@@ -1,0 +1,14 @@
+﻿2026-10-21T08:15:01.9063584Z ##[group]Run nttld/setup-ndk@v1
+2026-10-21T08:15:01.9063899Z with:
+2026-10-21T08:15:01.9064259Z   ndk-version: r21e
+2026-10-21T08:15:01.9064493Z   add-to-path: true
+2026-10-21T08:15:01.9064727Z   link-to-sdk: false
+2026-10-21T08:15:01.9064964Z   local-cache: false
+2026-10-21T08:15:01.9065197Z ##[endgroup]
+2026-10-21T08:15:01.9705222Z Attempting to download r21e...
+2026-10-21T08:15:19.1159681Z Extracting...
+2026-10-21T08:15:19.1181356Z [command]/usr/bin/unzip -o -q /home/runner/work/_temp/8f1dd88f-185b-4713-ad30-e689d89e6b90
+2026-10-21T08:15:40.6126957Z Adding to the tool cache...
+2026-10-21T08:16:04.8397605Z Done
+2026-10-21T08:16:04.8398487Z Added to path
+2026-10-21T08:16:04.8399021Z Detecting full version...

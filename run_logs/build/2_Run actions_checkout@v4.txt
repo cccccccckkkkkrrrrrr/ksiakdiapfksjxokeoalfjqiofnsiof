@@ -1,0 +1,73 @@
+﻿2026-10-21T08:15:01.3279683Z ##[group]Run actions/checkout@v4
+2026-10-21T08:15:01.3280103Z with:
+2026-10-21T08:15:01.3280417Z   repository: cccccccckkkkkrrrrrr/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:15:01.3282560Z   token: ***
+2026-10-21T08:15:01.3282788Z   ssh-strict: true
+2026-10-21T08:15:01.3283018Z   ssh-user: git
+2026-10-21T08:15:01.3283254Z   persist-credentials: true
+2026-10-21T08:15:01.3283514Z   clean: true
+2026-10-21T08:15:01.3283755Z   sparse-checkout-cone-mode: true
+2026-10-21T08:15:01.3284034Z   fetch-depth: 1
+2026-10-21T08:15:01.3284264Z   fetch-tags: false
+2026-10-21T08:15:01.3284499Z   show-progress: true
+2026-10-21T08:15:01.3284736Z   lfs: false
+2026-10-21T08:15:01.3284955Z   submodules: false
+2026-10-21T08:15:01.3285194Z   set-safe-directory: true
+2026-10-21T08:15:01.3285464Z   allow-unsafe-pr-checkout: false
+2026-10-21T08:15:01.3285802Z ##[endgroup]
+2026-10-21T08:15:01.3939504Z Syncing repository: cccccccckkkkkrrrrrr/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:15:01.3940862Z ##[group]Getting Git version info
+2026-10-21T08:15:01.3941681Z Working directory is '/home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof'
+2026-10-21T08:15:01.3942452Z [command]/usr/bin/git version
+2026-10-21T08:15:01.4016574Z git version 2.55.0
+2026-10-21T08:15:01.4029813Z ##[endgroup]
+2026-10-21T08:15:01.4039644Z Temporarily overriding HOME='/home/runner/work/_temp/28ff353a-4a13-4d29-8ec6-94c90abcbee5' before making global git config changes
+2026-10-21T08:15:01.4040948Z Adding repository directory to the temporary git global config as a safe directory
+2026-10-21T08:15:01.4043320Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:15:01.4086184Z Deleting the contents of '/home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof'
+2026-10-21T08:15:01.4089109Z ##[group]Initializing the repository
+2026-10-21T08:15:01.4092182Z [command]/usr/bin/git init /home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:15:01.4189426Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-10-21T08:15:01.4190251Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-10-21T08:15:01.4191088Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-10-21T08:15:01.4193919Z hint: call:
+2026-10-21T08:15:01.4194150Z hint:
+2026-10-21T08:15:01.4194444Z hint: 	git config --global init.defaultBranch <name>
+2026-10-21T08:15:01.4194889Z hint:
+2026-10-21T08:15:01.4195373Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-10-21T08:15:01.4196063Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-10-21T08:15:01.4196639Z hint:
+2026-10-21T08:15:01.4196865Z hint: 	git branch -m <name>
+2026-10-21T08:15:01.4197115Z hint:
+2026-10-21T08:15:01.4197446Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-10-21T08:15:01.4198159Z Initialized empty Git repository in /home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof/.git/
+2026-10-21T08:15:01.4200668Z [command]/usr/bin/git remote add origin https://github.com/cccccccckkkkkrrrrrr/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:15:01.4264948Z ##[endgroup]
+2026-10-21T08:15:01.4265412Z ##[group]Disabling automatic garbage collection
+2026-10-21T08:15:01.4265778Z [command]/usr/bin/git config --local gc.auto 0
+2026-10-21T08:15:01.4298637Z ##[endgroup]
+2026-10-21T08:15:01.4299170Z ##[group]Setting up auth
+2026-10-21T08:15:01.4299667Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-10-21T08:15:01.4325961Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-10-21T08:15:01.4605813Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-10-21T08:15:01.4633355Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-10-21T08:15:01.4805365Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-10-21T08:15:01.4832276Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-10-21T08:15:01.4993998Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-10-21T08:15:01.5048554Z ##[endgroup]
+2026-10-21T08:15:01.5049116Z ##[group]Fetching the repository
+2026-10-21T08:15:01.5054525Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +49afdab764ae613d2a342b36414079c1b7a825bf:refs/remotes/origin/main
+2026-10-21T08:15:01.8692508Z From https://github.com/cccccccckkkkkrrrrrr/ksiakdiapfksjxokeoalfjqiofnsiof
+2026-10-21T08:15:01.8694688Z  * [new ref]         49afdab764ae613d2a342b36414079c1b7a825bf -> origin/main
+2026-10-21T08:15:01.8695997Z ##[endgroup]
+2026-10-21T08:15:01.8696475Z ##[group]Determining the checkout info
+2026-10-21T08:15:01.8697858Z ##[endgroup]
+2026-10-21T08:15:01.8702584Z [command]/usr/bin/git sparse-checkout disable
+2026-10-21T08:15:01.8747672Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-10-21T08:15:01.8773492Z ##[group]Checking out the ref
+2026-10-21T08:15:01.8781013Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+2026-10-21T08:15:01.8834710Z Switched to a new branch 'main'
+2026-10-21T08:15:01.8839370Z branch 'main' set up to track 'origin/main'.
+2026-10-21T08:15:01.8843219Z ##[endgroup]
+2026-10-21T08:15:01.8875725Z [command]/usr/bin/git log -1 --format=%H
+2026-10-21T08:15:01.8896201Z 49afdab764ae613d2a342b36414079c1b7a825bf
