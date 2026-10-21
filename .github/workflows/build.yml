@@ -1,0 +1,57 @@
+name: Build MainHub Native Library
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Android NDK (r21e)
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r21e
+
+    - name: Compile C Code for All Architectures
+      run: |
+        NDK_BIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
+        mkdir -p "libs/Маинхаб/armeabi" "libs/Маинхаб/armeabi-v7a" "libs/Маинхаб/arm64-v8a" "libs/Маинхаб/x86" "libs/Маинхаб/x86_64" "libs/Маинхаб/mips" "libs/Маинхаб/mips64"
+        
+        # armeabi (ARMv5) - специальные флаги для обратной совместимости
+        $NDK_BIN/armv7a-linux-androideabi16-clang -shared -fPIC -march=armv5te -mfloat-abi=soft mainhub.c -o "libs/Маинхаб/armeabi/libmainhub.so" -llog
+        
+        # armeabi-v7a
+        $NDK_BIN/armv7a-linux-androideabi16-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/armeabi-v7a/libmainhub.so" -llog
+        
+        # arm64-v8a
+        $NDK_BIN/aarch64-linux-android21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/arm64-v8a/libmainhub.so" -llog
+        
+        # x86
+        $NDK_BIN/i686-linux-android16-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/x86/libmainhub.so" -llog
+        
+        # x86_64
+        $NDK_BIN/x86_64-linux-android21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/x86_64/libmainhub.so" -llog
+        
+        # mips (NDK r21e может не иметь компилятора mips, но пытаемся)
+        $NDK_BIN/mipsel-linux-android16-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/mips/libmainhub.so" -llog || true
+        
+        # mips64
+        $NDK_BIN/mips64el-linux-android21-clang -shared -fPIC mainhub.c -o "libs/Маинхаб/mips64/libmainhub.so" -llog || true
+
+    - name: Commit and Push Native Libraries
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add -f "libs/Маинхаб"
+        git commit -m "Build MainHub native libraries for all architectures" || echo "No changes to commit"
+        git pull --rebase origin main
+        git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
