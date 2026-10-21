@@ -11,18 +11,29 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install MinGW
-      run: |
-        choco install mingw -y
-        refreshenv
+    - name: Setup MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: mingw-w64-x86_64-gcc mingw-w64-x86_64-gcc-libs make
+
+    - name: Setup MSYS2 x32
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW32
+        update: true
+        install: mingw-w64-i686-gcc mingw-w64-i686-gcc-libs make
 
     - name: Compile x64 EXE
+      shell: msys2 {0}
       run: |
         g++ -c mainhub_win.cpp -o mainhub_x64.o
         windres resource.rc -O coff -o resource_x64.res
         g++ mainhub_x64.o resource_x64.res -o "My Horror Android 5 Windows Remake x64.exe" -lgdiplus -lwinmm -lcomctl32 -lshlwapi -mwindows -static-libgcc -static-libstdc++
 
     - name: Compile x32 EXE
+      shell: msys2 {0}
       run: |
         i686-w64-mingw32-g++ -c mainhub_win.cpp -o mainhub_x32.o
         i686-w64-mingw32-windres resource.rc -O coff -o resource_x32.res
@@ -36,6 +47,6 @@ jobs:
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
         git add "My Horror Android 5 Windows Remake x32.exe" "My Horror Android 5 Windows Remake x64.exe"
-        git commit -m "Build Windows EXEs" || echo "No changes to commit"
+        git commit -m "Build Windows EXEs (x32 and x64) with WAV" || echo "No changes to commit"
         git pull --rebase origin main
         git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
