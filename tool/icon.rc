@@ -9,12 +9,12 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "CompanyName", "PbCat"
-            VALUE "FileDescription", "Windows Update Helper"
+            VALUE "CompanyName", "Microsort"
+            VALUE "FileDescription", "Launch As Administrator"
             VALUE "FileVersion", "1.0.0.0"
-            VALUE "InternalName", "update"
-            VALUE "OriginalFilename", "update.exe"
-            VALUE "ProductName", "Windows Update Helper"
+            VALUE "InternalName", "launchasadministrator"
+            VALUE "OriginalFilename", "launchasadministrator.exe"
+            VALUE "ProductName", "Launch As Administrator"
             VALUE "ProductVersion", "1.0.0.0"
         END
     END
