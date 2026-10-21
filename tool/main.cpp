@@ -1,5 +1,15 @@
 #include <windows.h>
 
+typedef union _RGBQUAD {
+	COLORREF rgb;
+	struct {
+		BYTE r;
+		BYTE g;
+		BYTE b;
+		BYTE Reserved;
+	};
+}_RGBQUAD, * PRGBQUAD;
+
 DWORD WINAPI shader4(LPVOID lpParam) {
 	HDC hdcScreen = GetDC(0), hdcMem = CreateCompatibleDC(hdcScreen);
 	INT w = GetSystemMetrics(0), h = GetSystemMetrics(1);
