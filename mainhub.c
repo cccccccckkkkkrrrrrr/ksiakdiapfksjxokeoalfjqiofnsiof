@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 
 static const char *B16 = "0123456789ABCDEF";
 static const char *B32 = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
@@ -11,6 +12,8 @@ static const char *B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqr
 static const char *B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 static const char *B85 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~";
 static const char *B91 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~\"";
+
+// --- BASE ENCODERS ---
 
 JNIEXPORT jstring JNICALL
 Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_toBase16(JNIEnv *e, jobject t, jstring s) {
@@ -217,6 +220,8 @@ Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_toBase91(JNIEn
     return r;
 }
 
+// --- CAESAR CIPHER ---
+
 JNIEXPORT jstring JNICALL
 Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_caesarEncrypt(JNIEnv *e, jobject t, jstring s, jint sh) {
     const char *p = (*e)->GetStringUTFChars(e, s, 0);
@@ -228,6 +233,94 @@ Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_caesarEncrypt(
         else if (c >= 'A' && c <= 'Z') c = 'A' + ((c - 'A' + sh) % 26);
         o[i] = c;
     }
+    o[n] = 0;
+    jstring r = (*e)->NewStringUTF(e, o);
+    free(o);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_caesarDecrypt(JNIEnv *e, jobject t, jstring s, jint sh) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    int n = strlen(p);
+    char *o = (char*)malloc(n + 1);
+    for (int i = 0; i < n; i++) {
+        unsigned char c = p[i];
+        if (c >= 'a' && c <= 'z') c = 'a' + ((c - 'a' - sh + 260) % 26);
+        else if (c >= 'A' && c <= 'Z') c = 'A' + ((c - 'A' - sh + 260) % 26);
+        o[i] = c;
+    }
+    o[n] = 0;
+    jstring r = (*e)->NewStringUTF(e, o);
+    free(o);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+// --- MORSE CODE ---
+
+static const char *MORSE_LATIN[] = {
+    ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---",
+    "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-",
+    "..-", "...-", ".--", "-..-", "-.--", "--.."
+};
+static const char *MORSE_LATIN_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static const char *MORSE_CYRILLIC_CHARS = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+static const char *MORSE_CYRILLIC[] = {
+    ".-", "-...", ".--", "--.", "-..", ".", "...-", "--..", "..", ".---",
+    "-.-", ".-..", "--", "-.", "---", ".--.", ".-.", "...", "-", "..-",
+    "..-.", "....", "-.-.", "---.", "----", "--.-", "--.--", "-.--", "-..-",
+    "..-..", "..--", ".-.-"
+};
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_toMorse(JNIEnv *e, jobject t, jstring s, jboolean cyrillic) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    int n = strlen(p);
+    char *o = (char*)malloc(n * 6 + 1);
+    int j = 0;
+    for (int i = 0; i < n; i++) {
+        char c = toupper(p[i]);
+        if (c == ' ') { o[j++] = '/'; o[j++] = ' '; continue; }
+        int found = 0;
+        if (cyrillic) {
+            const char *pos = strchr(MORSE_CYRILLIC_CHARS, c);
+            if (pos) {
+                int idx = pos - MORSE_CYRILLIC_CHARS;
+                const char *m = MORSE_CYRILLIC[idx];
+                while (*m) o[j++] = *m++;
+                o[j++] = ' ';
+                found = 1;
+            }
+        }
+        if (!found) {
+            const char *pos = strchr(MORSE_LATIN_CHARS, c);
+            if (pos) {
+                int idx = pos - MORSE_LATIN_CHARS;
+                const char *m = MORSE_LATIN[idx];
+                while (*m) o[j++] = *m++;
+                o[j++] = ' ';
+                found = 1;
+            }
+        }
+        if (!found) { o[j++] = '?'; o[j++] = ' '; }
+    }
+    o[j] = 0;
+    jstring r = (*e)->NewStringUTF(e, o);
+    free(o);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+// --- COOL THINGS ---
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_reverseText(JNIEnv *e, jobject t, jstring s) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    int n = strlen(p);
+    char *o = (char*)malloc(n + 1);
+    for (int i = 0; i < n; i++) o[i] = p[n - 1 - i];
     o[n] = 0;
     jstring r = (*e)->NewStringUTF(e, o);
     free(o);
