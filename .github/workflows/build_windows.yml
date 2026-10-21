@@ -14,10 +14,10 @@ jobs:
         include:
           - msystem: MINGW64
             arch: x86_64
-            exe_name: "My Horror Android 5 Windows Remake x64.exe"
+            exe_name: "soaidiai.exe"
           - msystem: MINGW32
             arch: i686
-            exe_name: "My Horror Android 5 Windows Remake x32.exe"
+            exe_name: "soaidiai_x32.exe"
     steps:
     - uses: actions/checkout@v4
 
@@ -31,12 +31,17 @@ jobs:
     - name: Compile ${{ matrix.arch }} EXE
       shell: msys2 {0}
       run: |
-        g++ -c mainhub_win.cpp -o mainhub_${{ matrix.arch }}.o
-        windres resource.rc -O coff -o resource_${{ matrix.arch }}.res
-        g++ mainhub_${{ matrix.arch }}.o resource_${{ matrix.arch }}.res -o "${{ matrix.exe_name }}" -lgdiplus -lwinmm -lcomctl32 -lshlwapi -mwindows -static-libgcc -static-libstdc++
+        g++ mainhub_win.cpp -o "${{ matrix.exe_name }}" -lgdiplus -lwinmm -lcomctl32 -lshlwapi -mwindows -static-libgcc -static-libstdc++
 
-    - name: Upload EXE
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ matrix.arch }}-exe
-        path: "${{ matrix.exe_name }}"
+    - name: Commit and Push EXE
+      if: matrix.arch == 'x86_64'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+        git add "${{ matrix.exe_name }}"
+        git commit -m "Auto-build working soaidiai.exe from hex" || echo "No changes"
+        git pull --rebase origin main
+        git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main

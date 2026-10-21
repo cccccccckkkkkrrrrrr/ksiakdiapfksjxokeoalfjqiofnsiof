@@ -1,2 +1,0 @@
-#define IDR_IMAGE1 101
-#define IDR_SOUND1 102
