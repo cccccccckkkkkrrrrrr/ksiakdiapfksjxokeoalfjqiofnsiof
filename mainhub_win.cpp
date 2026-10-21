@@ -15,7 +15,7 @@
 
 using namespace Gdiplus;
 
-extern unsigned char img_data[];
+extern unsigned img_data img_data[];
 extern unsigned int img_data_len;
 extern void PlayWavFromResource(HINSTANCE, int);
 
@@ -24,7 +24,7 @@ HWND g_hImageWnd = NULL;
 HBITMAP g_hBitmap = NULL;
 int g_imgW = 0, g_imgH = 0;
 
-HBITMAP LoadPNGFromMemory(const unsigned char* data, int size, int* width, int* height) {
+HBITMAP LoadPNGFromMemory(const unsigned img_data* data, int size, int* width, int* height) {
     IStream* pStream = SHCreateMemStream(data, size);
     if (!pStream) return NULL;
     Bitmap* bmp = new Bitmap(pStream);
@@ -172,7 +172,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
     GdiplusShutdown(gdiplusToken);
     return 0;
 }
-unsigned char img_data[] = {
+unsigned img_data image_png[] = {
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
   0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x02, 0x10, 0x00, 0x00, 0x03, 0x20,
   0x08, 0x06, 0x00, 0x00, 0x00, 0x72, 0x0d, 0x5b, 0x90, 0x00, 0x00, 0x00,
@@ -16547,7 +16547,7 @@ unsigned char img_data[] = {
   0x6a, 0xf5, 0x59, 0x17, 0xba, 0xd8, 0x88, 0x00, 0x00, 0x00, 0x00, 0x49,
   0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
 };
-unsigned int img_data_len = 196471;
+unsigned int image_png_len = 196471;
 #include <windows.h>
 #include "resource.h"
 void PlayWavFromResource(HINSTANCE hInstance, int resId) {
