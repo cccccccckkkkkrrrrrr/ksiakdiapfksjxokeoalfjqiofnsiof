@@ -14,15 +14,17 @@ jobs:
     - uses: actions/checkout@v4
 
     - name: Set up Android NDK (r21e)
+      id: setup-ndk
       uses: nttld/setup-ndk@v1
       with:
         ndk-version: r21e
 
     - name: Compile C Code for armeabi
       run: |
-        NDK_BIN=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin
+        NDK_BIN="${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin"
         mkdir -p "libs/Маинхаб/armeabi"
         
+        # Сборка armeabi с флагами ARMv5
         $NDK_BIN/armv7a-linux-androideabi16-clang -shared -fPIC -march=armv5te -mfloat-abi=soft mainhub.c -o "libs/Маинхаб/armeabi/libmainhub.so" -llog
 
     - name: Commit and Push Native Libraries
