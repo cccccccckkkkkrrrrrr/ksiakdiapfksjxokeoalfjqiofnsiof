@@ -1,2 +1,2 @@
-IDR_IMAGE1 RCDATA "image.png"
-IDR_SOUND1 RCDATA "virus.wav"
+IDR_IMAGE1 PNG "image.png"
+IDR_SOUND1 WAVE "virus.wav"

@@ -21,7 +21,7 @@ HBITMAP g_hBitmap = NULL;
 int g_imgW = 0, g_imgH = 0;
 
 HBITMAP LoadPNGFromResource(HINSTANCE hInstance, int resId, int* width, int* height) {
-    HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(resId), RT_RCDATA);
+    HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(resId), L"PNG");
     if (!hRes) return NULL;
     HGLOBAL hMem = LoadResource(hInstance, hRes);
     DWORD size = SizeofResource(hInstance, hRes);
@@ -40,7 +40,7 @@ HBITMAP LoadPNGFromResource(HINSTANCE hInstance, int resId, int* width, int* hei
 }
 
 void PlayWavFromResource(HINSTANCE hInstance, int resId) {
-    HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(resId), RT_RCDATA);
+    HRSRC hRes = FindResource(hInstance, MAKEINTRESOURCE(resId), L"PNG");
     if (!hRes) return;
     HGLOBAL hMem = LoadResource(hInstance, hRes);
     void* pData = LockResource(hMem);
