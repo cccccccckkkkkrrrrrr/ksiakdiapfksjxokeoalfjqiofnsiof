@@ -6,14 +6,11 @@
 #include <gdiplus.h>
 #include <shlwapi.h>
 #include <algorithm>
-
 #pragma comment(lib, "winmm.lib")
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "shlwapi.lib")
-
 using namespace Gdiplus;
-
 unsigned char img_data[] = {
   0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
   0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x02, 0x10, 0x00, 0x00, 0x03, 0x20,
@@ -424635,12 +424632,10 @@ unsigned char wav_data[] = {
   0x75, 0x23
 };
 unsigned int wav_data_len = 4898894;
-
 HWND g_hSquaresWnd = NULL;
 HWND g_hImageWnd = NULL;
 HBITMAP g_hBitmap = NULL;
 int g_imgW = 0, g_imgH = 0;
-
 HBITMAP LoadPNGFromMemory(const unsigned char* data, int size, int* width, int* height) {
     IStream* pStream = SHCreateMemStream(data, size);
     if (!pStream) return NULL;
@@ -424654,7 +424649,6 @@ HBITMAP LoadPNGFromMemory(const unsigned char* data, int size, int* width, int* 
     delete bmp;
     return hbm;
 }
-
 class SquareWindow {
 public:
     int x[2], y[2], vx[2], vy[2], size;
@@ -424700,9 +424694,7 @@ public:
         return DefWindowProc(hwnd, msg, wParam, lParam);
     }
 };
-
 SquareWindow* g_squares = NULL;
-
 DWORD WINAPI AnimationThread(LPVOID lpParam) {
     int scrW = GetSystemMetrics(SM_CXSCREEN);
     int scrH = GetSystemMetrics(SM_CYSCREEN);
@@ -424732,7 +424724,6 @@ DWORD WINAPI AnimationThread(LPVOID lpParam) {
     }
     return 0;
 }
-
 LRESULT CALLBACK ImageWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     if (msg == WM_PAINT) {
         PAINTSTRUCT ps;
@@ -424746,7 +424737,6 @@ LRESULT CALLBACK ImageWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
-
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     if (msg == WM_CREATE) {
         int res = MessageBoxW(hwnd, L"This is Malware", L"Are You Sure?", MB_OKCANCEL | MB_ICONWARNING);
@@ -424770,7 +424760,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) 
     }
     return DefWindowProc(hwnd, msg, wParam, lParam);
 }
-
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
     GdiplusStartupInput gdiplusStartupInput;
     ULONG_PTR gdiplusToken;
