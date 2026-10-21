@@ -104,10 +104,14 @@ public class Jadx extends Activity {
                             File outDir = new File(Environment.getExternalStorageDirectory(), "Decompiled_Jadx");
                             if (!outDir.exists()) outDir.mkdirs();
 
-                            // Попытка отключить ZipSecurity через рефлексию (если метод есть)
+                            // Пытаемся отключить защиту через системное свойство Java
+                            System.setProperty("JADX_DISABLE_ZIP_SECURITY", "true");
+                            // Дополнительный флаг на случай, если JADX читает его как env
                             try {
-                                java.lang.reflect.Method setSecurity = jadx.api.JadxArgs.class.getMethod("setSecurity", jadx.api.security.IJadxSecurity.class);
-                                setSecurity.invoke(new jadx.api.JadxArgs(), new jadx.api.security.JadxSecurity(jadx.api.security.JadxSecurityFlag.NONE));
+                                java.lang.reflect.Field env = System.getenv().getClass().getDeclaredField("m");
+                                env.setAccessible(true);
+                                java.util.Map<String,String> map = (java.util.Map<String,String>) env.get(System.getenv());
+                                map.put("JADX_DISABLE_ZIP_SECURITY", "true");
                             } catch (Exception ignored) {}
 
                             jadx.api.JadxArgs args = new jadx.api.JadxArgs();
@@ -130,7 +134,12 @@ public class Jadx extends Activity {
                             runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(Jadx.this, "Error: " + err, Toast.LENGTH_LONG).show();
+                                    // Ловим именно ошибку ZipSecurity и показываем понятный текст
+                                    if (err != null && err.contains("JadxZipSecurity")) {
+                                        Toast.makeText(Jadx.this, "Файл защищён (ZipSecurity). JADX не может его открыть.", Toast.LENGTH_LONG).show();
+                                    } else {
+                                        Toast.makeText(Jadx.this, "Error: " + err, Toast.LENGTH_LONG).show();
+                                    }
                                 }
                             });
                         }
@@ -160,11 +169,9 @@ public class Jadx extends Activity {
                     is.close();
                     selectedPath = tempFile.getAbsolutePath();
 
-                    // Получаем информацию о файле (название, пакет, версия) через PackageManager
                     android.content.pm.PackageInfo pi = getPackageManager().getPackageArchiveInfo(selectedPath, 0);
                     if (pi != null) {
                         fileInfo = "Package: " + pi.packageName + "\nVersion: " + pi.versionName + "\nVersion Code: " + pi.versionCode;
-                        // Имя приложения
                         android.content.pm.ApplicationInfo ai = pi.applicationInfo;
                         if (ai != null) {
                             ai.sourceDir = selectedPath;
