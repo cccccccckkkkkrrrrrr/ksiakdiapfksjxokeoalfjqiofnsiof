@@ -1,0 +1,10 @@
+﻿2026-10-21T12:09:04.9271218Z ##[group]Run mkdir -p out
+2026-10-21T12:09:04.9271544Z [36;1mmkdir -p out[0m
+2026-10-21T12:09:04.9272075Z [36;1mif [ "both" == "x64" ] || [ "both" == "both" ]; then x86_64-w64-mingw32-g++ -O2 -o out/zaebal_x64.exe tool/main.cpp -static; fi[0m
+2026-10-21T12:09:04.9272858Z [36;1mif [ "both" == "x32" ] || [ "both" == "both" ]; then i686-w64-mingw32-g++ -O2 -o out/zaebal_x32.exe tool/main.cpp -static; fi[0m
+2026-10-21T12:09:04.9327699Z shell: /usr/bin/bash -e {0}
+2026-10-21T12:09:04.9328014Z ##[endgroup]
+2026-10-21T12:09:06.1680767Z /usr/bin/x86_64-w64-mingw32-ld: /usr/lib/gcc/x86_64-w64-mingw32/13-win32/../../../../x86_64-w64-mingw32/lib/libmingw32.a(lib64_libmingw32_a-crtexewin.o): in function `main':
+2026-10-21T12:09:06.1682830Z /usr/src/mingw-w64-11.0.1-3build1/mingw-w64-crt/crt/crtexewin.c:70:(.text.startup+0xc3): undefined reference to `WinMain'
+2026-10-21T12:09:06.1715370Z collect2: error: ld returned 1 exit status
+2026-10-21T12:09:06.1789287Z ##[error]Process completed with exit code 1.
