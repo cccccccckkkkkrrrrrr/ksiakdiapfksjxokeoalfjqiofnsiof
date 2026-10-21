@@ -3,6 +3,8 @@ package multi.decompiler.by.pbcat;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,14 +17,22 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import java.io.File;
+import java.io.InputStream;
+import java.io.FileOutputStream;
 
 public class Jadx extends Activity {
     private static final int PICK_FILE_CODE = 100;
     private String selectedPath = "";
+    private String fileInfo = "";
+    private String mode = "apk";
+    private TextView infoView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mode = getIntent().getStringExtra("mode");
+        if (mode == null) mode = "apk";
+
         requestStoragePermissions();
 
         ScrollView scroll = new ScrollView(this);
@@ -30,18 +40,24 @@ public class Jadx extends Activity {
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setGravity(Gravity.CENTER_HORIZONTAL);
-        layout.setPadding(40, 100, 40, 100);
+        layout.setPadding(40, 80, 40, 100);
 
         TextView title = new TextView(this);
-        title.setText("JADX Decompiler");
+        title.setText(mode.equals("apk") ? "Decompile APK" : "Decompile DEX");
         title.setTextColor(Color.WHITE);
         title.setTextSize(24);
-        title.setTypeface(null, android.graphics.Typeface.BOLD);
+        title.setTypeface(null, Typeface.BOLD);
         title.setPadding(0, 0, 0, 40);
         layout.addView(title);
 
         Button pickBtn = new Button(this);
-        pickBtn.setText("1. SELECT APK / DEX FILE");
+        pickBtn.setText("SELECT FILE");
+        GradientDrawable gd = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[]{Color.parseColor("#FF0000"), Color.parseColor("#FF8C00")});
+        gd.setCornerRadius(50);
+        gd.setStroke(3, Color.parseColor("#FFFF00"));
+        pickBtn.setBackground(new android.graphics.drawable.RippleDrawable(android.content.res.ColorStateList.valueOf(Color.parseColor("#44FFFFFF")), gd, null));
+        pickBtn.setTextColor(Color.WHITE);
+        pickBtn.setTypeface(null, Typeface.BOLD);
         layout.addView(pickBtn, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 140));
         pickBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,8 +69,25 @@ public class Jadx extends Activity {
             }
         });
 
+        infoView = new TextView(this);
+        infoView.setTextColor(Color.WHITE);
+        infoView.setTextSize(14);
+        infoView.setPadding(20, 20, 20, 20);
+        infoView.setBackgroundColor(Color.parseColor("#1A1A1A"));
+        infoView.setVisibility(View.GONE);
+        LinearLayout.LayoutParams infoLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        infoLp.topMargin = 20;
+        infoLp.bottomMargin = 20;
+        layout.addView(infoView, infoLp);
+
         Button decompileBtn = new Button(this);
-        decompileBtn.setText("2. DECOMPILE TO JAVA");
+        decompileBtn.setText("DECOMPILE TO JAVA");
+        GradientDrawable gd2 = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[]{Color.parseColor("#00FFFF"), Color.parseColor("#0000FF")});
+        gd2.setCornerRadius(50);
+        gd2.setStroke(3, Color.parseColor("#FFFFFF"));
+        decompileBtn.setBackground(new android.graphics.drawable.RippleDrawable(android.content.res.ColorStateList.valueOf(Color.parseColor("#44FFFFFF")), gd2, null));
+        decompileBtn.setTextColor(Color.WHITE);
+        decompileBtn.setTypeface(null, Typeface.BOLD);
         layout.addView(decompileBtn, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 140));
         decompileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,8 +104,11 @@ public class Jadx extends Activity {
                             File outDir = new File(Environment.getExternalStorageDirectory(), "Decompiled_Jadx");
                             if (!outDir.exists()) outDir.mkdirs();
 
-                            // Отключаем проверку безопасности Zip (чтобы избежать ошибки JadxZipSecurity)
-                            System.setProperty("JADX_DISABLE_ZIP_SECURITY", "true");
+                            // Попытка отключить ZipSecurity через рефлексию (если метод есть)
+                            try {
+                                java.lang.reflect.Method setSecurity = jadx.api.JadxArgs.class.getMethod("setSecurity", jadx.api.security.IJadxSecurity.class);
+                                setSecurity.invoke(new jadx.api.JadxArgs(), new jadx.api.security.JadxSecurity(jadx.api.security.JadxSecurityFlag.NONE));
+                            } catch (Exception ignored) {}
 
                             jadx.api.JadxArgs args = new jadx.api.JadxArgs();
                             args.setInputFile(input);
@@ -114,15 +150,33 @@ public class Jadx extends Activity {
             Uri uri = data.getData();
             if (uri != null) {
                 try {
-                    java.io.InputStream is = getContentResolver().openInputStream(uri);
+                    InputStream is = getContentResolver().openInputStream(uri);
                     File tempFile = new File(getCacheDir(), "input_file.bin");
-                    java.io.FileOutputStream os = new java.io.FileOutputStream(tempFile);
+                    FileOutputStream os = new FileOutputStream(tempFile);
                     byte[] buffer = new byte[4096];
                     int len;
                     while ((len = is.read(buffer)) > 0) os.write(buffer, 0, len);
                     os.close();
                     is.close();
                     selectedPath = tempFile.getAbsolutePath();
+
+                    // Получаем информацию о файле (название, пакет, версия) через PackageManager
+                    android.content.pm.PackageInfo pi = getPackageManager().getPackageArchiveInfo(selectedPath, 0);
+                    if (pi != null) {
+                        fileInfo = "Package: " + pi.packageName + "\nVersion: " + pi.versionName + "\nVersion Code: " + pi.versionCode;
+                        // Имя приложения
+                        android.content.pm.ApplicationInfo ai = pi.applicationInfo;
+                        if (ai != null) {
+                            ai.sourceDir = selectedPath;
+                            ai.publicSourceDir = selectedPath;
+                            fileInfo = "App: " + getPackageManager().getApplicationLabel(ai) + "\n" + fileInfo;
+                        }
+                    } else {
+                        fileInfo = "File: " + tempFile.getName() + "\nSize: " + tempFile.length() + " bytes";
+                    }
+
+                    infoView.setText(fileInfo);
+                    infoView.setVisibility(View.VISIBLE);
                     Toast.makeText(this, "Файл выбран", Toast.LENGTH_SHORT).show();
                 } catch (Exception e) {
                     Toast.makeText(this, "Ошибка чтения файла", Toast.LENGTH_SHORT).show();

@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "multi.decompiler.by.pbcat"
-        minSdk 24
+        minSdk 26
         targetSdk 34
         versionCode 1
         versionName "1.0"
@@ -30,9 +30,18 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
     
+    
+}
+
+dependencies {
+    implementation 'com.github.oscar0812:JDSXTool:1.0.0'
+}
+
+dependencies {
+    // JADX для APK/DEX
     implementation 'io.github.skylot:jadx-core:1.5.6'
     implementation 'io.github.skylot:jadx-dex-input:1.5.6'
     
-    implementation 'com.android.tools.smali:smali-baksmali:3.0.10'
-    implementation 'com.android.tools.smali:smali-dexlib2:3.0.10'
+    // Smali to Java через JDSXTool
+    implementation 'com.github.oscar0812:JDSXTool:1.0.0'
 }

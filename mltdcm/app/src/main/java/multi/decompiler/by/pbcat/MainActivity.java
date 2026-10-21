@@ -7,8 +7,11 @@ import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.content.res.ColorStateList;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -17,6 +20,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -40,6 +44,14 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT >= 30) {
+            if (!Environment.isExternalStorageManager()) {
+                Intent intent = new Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(intent);
+            }
+        }
 
         Window window = getWindow();
         if (Build.VERSION.SDK_INT >= 21) {
@@ -71,16 +83,47 @@ public class MainActivity extends Activity {
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
         int btnWidth = screenWidth - 80;
 
-        Button jadxBtn = new Button(this);
-        jadxBtn.setText("JADX (Decompile APK/DEX to Java)");
-        applyMegaButtonStyle(jadxBtn, "#FF0000", "#FF8C00", "#FFFF00", "#FFFFFF");
+        Button apkBtn = new Button(this);
+        apkBtn.setText("Decompile APK");
+        applyMegaButtonStyle(apkBtn, "#FF0000", "#FF8C00", "#FFFF00", "#FFFFFF");
         LinearLayout.LayoutParams lp1 = new LinearLayout.LayoutParams(btnWidth, 160);
         lp1.bottomMargin = 30;
-        layout.addView(jadxBtn, lp1);
-        jadxBtn.setOnClickListener(new View.OnClickListener() {
+        layout.addView(apkBtn, lp1);
+        apkBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, Jadx.class));
+                Intent i = new Intent(MainActivity.this, Jadx.class);
+                i.putExtra("mode", "apk");
+                startActivity(i);
+            }
+        });
+
+        Button dexBtn = new Button(this);
+        dexBtn.setText("Decompile DEX");
+        applyMegaButtonStyle(dexBtn, "#00FFFF", "#0000FF", "#FFFFFF", "#FFFFFF");
+        LinearLayout.LayoutParams lp2 = new LinearLayout.LayoutParams(btnWidth, 160);
+        lp2.bottomMargin = 30;
+        layout.addView(dexBtn, lp2);
+        dexBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this, Jadx.class);
+                i.putExtra("mode", "dex");
+                startActivity(i);
+            }
+        });
+
+        Button smaliBtn = new Button(this);
+        smaliBtn.setText("Smali to Java");
+        applyMegaButtonStyle(smaliBtn, "#00FF00", "#008000", "#FFFFFF", "#FFFFFF");
+        LinearLayout.LayoutParams lp3 = new LinearLayout.LayoutParams(btnWidth, 160);
+        lp3.bottomMargin = 30;
+        layout.addView(smaliBtn, lp3);
+        smaliBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(MainActivity.this, SmaliToJava.class);
+                startActivity(i);
             }
         });
 
