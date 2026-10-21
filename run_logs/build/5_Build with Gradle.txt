@@ -1,0 +1,96 @@
+﻿2026-10-21T08:42:18.3455769Z ##[group]Run cd mltdcm
+2026-10-21T08:42:18.3455995Z [36;1mcd mltdcm[0m
+2026-10-21T08:42:18.3456148Z [36;1mgradle wrapper --gradle-version 8.2[0m
+2026-10-21T08:42:18.3456320Z [36;1m./gradlew assembleDebug[0m
+2026-10-21T08:42:18.3661426Z shell: /usr/bin/bash -e {0}
+2026-10-21T08:42:18.3661600Z env:
+2026-10-21T08:42:18.3661783Z   JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-21T08:42:18.3662049Z   JAVA_HOME_17_X64: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.20-1/x64
+2026-10-21T08:42:18.3662318Z   GRADLE_ACTION_ID: gradle/actions/setup-gradle
+2026-10-21T08:42:18.3662489Z   GRADLE_BUILD_ACTION_SETUP_COMPLETED: true
+2026-10-21T08:42:18.3662648Z   GRADLE_BUILD_ACTION_CACHE_RESTORED: true
+2026-10-21T08:42:18.3662880Z   DEVELOCITY_INJECTION_INIT_SCRIPT_NAME: gradle-actions.inject-develocity.init.gradle
+2026-10-21T08:42:18.3663143Z   DEVELOCITY_AUTO_INJECTION_CUSTOM_VALUE: gradle-actions
+2026-10-21T08:42:18.3663322Z   GITHUB_DEPENDENCY_GRAPH_ENABLED: false
+2026-10-21T08:42:18.3663491Z ##[endgroup]
+2026-10-21T08:42:18.7385763Z 
+2026-10-21T08:42:18.7386249Z Welcome to Gradle 8.2!
+2026-10-21T08:42:18.7386452Z 
+2026-10-21T08:42:18.7387319Z Here are the highlights of this release:
+2026-10-21T08:42:18.7398171Z  - Kotlin DSL: new reference documentation, assignment syntax by default
+2026-10-21T08:42:18.7398897Z  - Kotlin DSL is now the default with Gradle init
+2026-10-21T08:42:18.7399369Z  - Improved suggestions to resolve errors in console output
+2026-10-21T08:42:18.7399816Z 
+2026-10-21T08:42:18.7400172Z For more details see https://docs.gradle.org/8.2/release-notes.html
+2026-10-21T08:42:18.7400590Z 
+2026-10-21T08:42:18.8391928Z Starting a Gradle Daemon (subsequent builds will be faster)
+2026-10-21T08:42:39.7409049Z > Task :wrapper
+2026-10-21T08:42:39.7425192Z 
+2026-10-21T08:42:39.7428594Z BUILD SUCCESSFUL in 21s
+2026-10-21T08:42:39.7429015Z 1 actionable task: 1 executed
+2026-10-21T08:42:40.1195847Z Downloading https://services.gradle.org/distributions/gradle-8.2-bin.zip
+2026-10-21T08:42:41.1247671Z ............10%............20%............30%.............40%............50%............60%............70%.............80%............90%............100%
+2026-10-21T08:42:43.8725119Z Checking the license for package Android SDK Build-Tools 33.0.1 in /usr/local/lib/android/sdk/licenses
+2026-10-21T08:42:43.8725862Z License for package Android SDK Build-Tools 33.0.1 accepted.
+2026-10-21T08:42:43.8726779Z Preparing "Install Android SDK Build-Tools 33.0.1 v.33.0.1".
+2026-10-21T08:42:45.1720779Z "Install Android SDK Build-Tools 33.0.1 v.33.0.1" ready.
+2026-10-21T08:42:45.1721265Z Installing Android SDK Build-Tools 33.0.1 in /usr/local/lib/android/sdk/build-tools/33.0.1
+2026-10-21T08:42:45.1721665Z "Install Android SDK Build-Tools 33.0.1 v.33.0.1" complete.
+2026-10-21T08:42:45.2721825Z "Install Android SDK Build-Tools 33.0.1 v.33.0.1" finished.
+2026-10-21T08:42:45.4744342Z > Task :app:preBuild UP-TO-DATE
+2026-10-21T08:42:45.4788160Z > Task :app:preDebugBuild UP-TO-DATE
+2026-10-21T08:42:45.4797589Z > Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+2026-10-21T08:42:45.5712260Z > Task :app:javaPreCompileDebug
+2026-10-21T08:42:52.5731924Z > Task :app:generateDebugResValues
+2026-10-21T08:42:52.5732415Z > Task :app:checkDebugAarMetadata
+2026-10-21T08:42:52.6718133Z > Task :app:mapDebugSourceSetPaths
+2026-10-21T08:42:52.6720429Z > Task :app:generateDebugResources
+2026-10-21T08:42:53.4712996Z > Task :app:packageDebugResources
+2026-10-21T08:42:53.9712320Z > Task :app:mergeDebugResources
+2026-10-21T08:42:54.7717626Z > Task :app:createDebugCompatibleScreenManifests
+2026-10-21T08:42:54.7721800Z > Task :app:extractDeepLinksDebug
+2026-10-21T08:42:54.8738126Z > Task :app:parseDebugLocalResources
+2026-10-21T08:42:55.0714068Z 
+2026-10-21T08:42:55.0721055Z > Task :app:processDebugMainManifest
+2026-10-21T08:42:55.0722503Z package="multi.decompiler.by.pbcat" found in source AndroidManifest.xml: /home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof/mltdcm/app/src/main/AndroidManifest.xml.
+2026-10-21T08:42:55.0724383Z Setting the namespace via the package attribute in the source AndroidManifest.xml is no longer supported, and the value is ignored.
+2026-10-21T08:42:55.0725610Z Recommendation: remove package="multi.decompiler.by.pbcat" from the source AndroidManifest.xml: /home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof/mltdcm/app/src/main/AndroidManifest.xml.
+2026-10-21T08:42:55.2720499Z 
+2026-10-21T08:42:55.2733862Z > Task :app:processDebugManifest
+2026-10-21T08:42:55.2735443Z > Task :app:mergeDebugShaders
+2026-10-21T08:42:55.2770375Z > Task :app:compileDebugShaders NO-SOURCE
+2026-10-21T08:42:55.2770943Z > Task :app:generateDebugAssets UP-TO-DATE
+2026-10-21T08:42:55.3722446Z > Task :app:mergeDebugAssets
+2026-10-21T08:42:55.3727898Z > Task :app:compressDebugAssets
+2026-10-21T08:42:55.3777823Z > Task :app:processDebugJavaRes NO-SOURCE
+2026-10-21T08:42:57.2728237Z > Task :app:desugarDebugFileDependencies
+2026-10-21T08:42:57.2748502Z > Task :app:mergeDebugJniLibFolders
+2026-10-21T08:42:57.3721781Z > Task :app:checkDebugDuplicateClasses
+2026-10-21T08:42:57.4716764Z > Task :app:mergeDebugNativeLibs NO-SOURCE
+2026-10-21T08:42:57.5808162Z > Task :app:mergeDebugJavaResource
+2026-10-21T08:43:13.7712276Z > Task :app:processDebugManifestForPackage
+2026-10-21T08:43:13.7737718Z > Task :app:mergeLibDexDebug
+2026-10-21T08:43:15.1737962Z > Task :app:stripDebugDebugSymbols NO-SOURCE
+2026-10-21T08:43:15.4718099Z > Task :app:processDebugResources FAILED
+2026-10-21T08:43:16.0712533Z > Task :app:validateSigningDebug
+2026-10-21T08:43:16.7720270Z 
+2026-10-21T08:43:16.7720771Z > Task :app:mergeExtDexDebug
+2026-10-21T08:43:16.7737584Z 23 actionable tasks: 23 executed
+2026-10-21T08:43:16.7739508Z FAILURE: Build failed with an exception.
+2026-10-21T08:43:16.7759103Z 
+2026-10-21T08:43:16.7780515Z * What went wrong:
+2026-10-21T08:43:16.7797671Z Execution failed for task ':app:processDebugResources'.
+2026-10-21T08:43:16.7844343Z > A failure occurred while executing com.android.build.gradle.internal.res.LinkApplicationAndroidResourcesTask$TaskAction
+2026-10-21T08:43:16.7863516Z    > Android resource linking failed
+2026-10-21T08:43:16.7864582Z      /home/runner/work/ksiakdiapfksjxokeoalfjqiofnsiof/ksiakdiapfksjxokeoalfjqiofnsiof/mltdcm/app/build/intermediates/packaged_manifests/debug/AndroidManifest.xml:20: error: resource mipmap/ic_launcher (aka multi.decompiler.by.pbcat:mipmap/ic_launcher) not found.
+2026-10-21T08:43:16.7865633Z      error: failed processing manifest.
+2026-10-21T08:43:16.7866244Z 
+2026-10-21T08:43:16.7866251Z 
+2026-10-21T08:43:16.7866317Z * Try:
+2026-10-21T08:43:16.7866555Z > Run with --stacktrace option to get the stack trace.
+2026-10-21T08:43:16.7866902Z > Run with --info or --debug option to get more log output.
+2026-10-21T08:43:16.7867330Z > Run with --scan to get full insights.
+2026-10-21T08:43:16.7867604Z > Get more help at https://help.gradle.org.
+2026-10-21T08:43:16.7867781Z 
+2026-10-21T08:43:16.7867861Z BUILD FAILED in 36s
+2026-10-21T08:43:16.8363413Z ##[error]Process completed with exit code 1.
