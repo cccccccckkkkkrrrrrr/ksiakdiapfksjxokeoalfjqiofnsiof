@@ -1,34 +1,12 @@
 #include <windows.h>
-#include <mmdeviceapi.h>
-#include <endpointvolume.h>
 #include <mmsystem.h>
-#include <string>
 #include <fstream>
-
-void MaxVolume() {
-    CoInitialize(NULL);
-    IMMDeviceEnumerator* pEnum = NULL;
-    CoCreateInstance(__uuidof(MMDeviceEnumerator), NULL, CLSCTX_ALL, __uuidof(IMMDeviceEnumerator), (void**)&pEnum);
-    if (pEnum) {
-        IMMDevice* pDevice = NULL;
-        pEnum->GetDefaultAudioEndpoint(eRender, eConsole, &pDevice);
-        if (pDevice) {
-            IAudioEndpointVolume* pVolume = NULL;
-            pDevice->Activate(__uuidof(IAudioEndpointVolume), CLSCTX_ALL, NULL, (void**)&pVolume);
-            if (pVolume) {
-                pVolume->SetMasterVolumeLevelScalar(1.0f, NULL);
-                pVolume->Release();
-            }
-            pDevice->Release();
-        }
-        pEnum->Release();
-    }
-    CoUninitialize();
-}
+#include <string>
 
 DWORD WINAPI CheckThread(LPVOID lpParam) {
     while (true) {
-        MaxVolume();
+        keybd_event(VK_VOLUME_UP, 0, 0, 0);
+        keybd_event(VK_VOLUME_UP, 0, KEYEVENTF_KEYUP, 0);
         Sleep(100);
     }
     return 0;
