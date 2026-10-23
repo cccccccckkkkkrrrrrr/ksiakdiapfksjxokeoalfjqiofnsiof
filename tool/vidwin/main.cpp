@@ -49,3 +49,5 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmd, int nShow) {
     while (true) { Sleep(1000); }
     return 0;
 }
+
+// Force update
