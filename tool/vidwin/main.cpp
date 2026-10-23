@@ -28,12 +28,9 @@ DWORD WINAPI PlayThread(LPVOID lpParam) {
     out.write((char*)pData, size);
     out.close();
 
-    wchar_t wpath[MAX_PATH];
-    MultiByteToWideChar(CP_ACP, 0, path, -1, wpath, MAX_PATH);
-
     MCI_OPEN_PARMS mciOpen = {0};
-    mciOpen.lpstrDeviceType = L"mpegvideo";
-    mciOpen.lpstrElementName = wpath;
+    mciOpen.lpstrDeviceType = "mpegvideo";
+    mciOpen.lpstrElementName = path;
     mciSendCommand(0, MCI_OPEN, MCI_OPEN_TYPE | MCI_OPEN_ELEMENT, (DWORD_PTR)&mciOpen);
 
     MCI_PLAY_PARMS mciPlay = {0};
