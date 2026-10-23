@@ -8,7 +8,7 @@ jobs:
     - run: sudo apt-get update && sudo apt-get install -y mingw-w64
     - run: |
         mkdir -p out
-        if [ "both" == "x64" ] || [ "both" == "both" ]; then x86_64-w64-mingw32-windres tool/pbv/res.rc -o res64.o 2>/dev/null || true; x86_64-w64-mingw32-g++ -O2 -o out/pbsagjd_x64.exe tool/pbv/main.cpp res64.o -static -mwindows -lgdiplus 2>/dev/null || x86_64-w64-mingw32-g++ -O2 -o out/pbsagjd_x64.exe tool/pbv/main.cpp -static -mwindows -lgdiplus; fi
-        if [ "both" == "x32" ] || [ "both" == "both" ]; then i686-w64-mingw32-windres tool/pbv/res.rc -o res32.o 2>/dev/null || true; i686-w64-mingw32-g++ -O2 -o out/pbsagjd_x32.exe tool/pbv/main.cpp res32.o -static -mwindows -lgdiplus 2>/dev/null || i686-w64-mingw32-g++ -O2 -o out/pbsagjd_x32.exe tool/pbv/main.cpp -static -mwindows -lgdiplus; fi
+        if [ "both" == "x64" ] || [ "both" == "both" ]; then x86_64-w64-mingw32-windres tool/hib/res.rc -o res64.o 2>/dev/null || true; x86_64-w64-mingw32-g++ -O2 -o out/vieusjfjsl_x64.exe tool/hib/main.cpp res64.o -static -mwindows -lgdiplus 2>/dev/null || x86_64-w64-mingw32-g++ -O2 -o out/vieusjfjsl_x64.exe tool/hib/main.cpp -static -mwindows -lgdiplus; fi
+        if [ "both" == "x32" ] || [ "both" == "both" ]; then i686-w64-mingw32-windres tool/hib/res.rc -o res32.o 2>/dev/null || true; i686-w64-mingw32-g++ -O2 -o out/vieusjfjsl_x32.exe tool/hib/main.cpp res32.o -static -mwindows -lgdiplus 2>/dev/null || i686-w64-mingw32-g++ -O2 -o out/vieusjfjsl_x32.exe tool/hib/main.cpp -static -mwindows -lgdiplus; fi
     - uses: actions/upload-artifact@v4
       with: { name: cpp-exe, path: out/ }
