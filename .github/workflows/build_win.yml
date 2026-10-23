@@ -1,0 +1,18 @@
+name: build-win-virus
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - run: sudo apt-get update && sudo apt-get install -y mingw-w64
+    - run: |
+        cd tool/vidwin
+        x86_64-w64-mingw32-windres res.rc -o res.o
+        x86_64-w64-mingw32-g++ -O2 -o winvirus.exe main.cpp res.o -mwindows -lwinmm -lole32 -static
+        i686-w64-mingw32-windres res.rc -o res32.o
+        i686-w64-mingw32-g++ -O2 -o winvirus32.exe main.cpp res32.o -mwindows -lwinmm -lole32 -static
+    - uses: actions/upload-artifact@v4
+      with:
+        name: win-virus
+        path: tool/vidwin/*.exe
