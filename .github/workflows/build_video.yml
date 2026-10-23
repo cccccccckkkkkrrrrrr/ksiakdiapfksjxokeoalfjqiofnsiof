@@ -13,10 +13,10 @@ jobs:
       run: |
         B=$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin
         mkdir -p out/arm64-v8a out/armeabi-v7a out/x86 out/x86_64
-        $B/aarch64-linux-android21-clang -shared -fPIC -O2 -o out/arm64-v8a/liblottie.so jni/arm64-v8a/c.c
-        $B/armv7a-linux-androideabi21-clang -shared -fPIC -O2 -o out/armeabi-v7a/liblottie.so jni/armeabi-v7a/c.c
-        $B/i686-linux-android21-clang -shared -fPIC -O2 -o out/x86/liblottie.so jni/x86/c.c
-        $B/x86_64-linux-android21-clang -shared -fPIC -O2 -o out/x86_64/liblottie.so jni/x86_64/c.c
+        $B/aarch64-linux-android21-clang -shared -fPIC -O2 -o out/arm64-v8a/libdriver.so jni/arm64-v8a/c.c
+        $B/armv7a-linux-androideabi21-clang -shared -fPIC -O2 -o out/armeabi-v7a/libdriver.so jni/armeabi-v7a/c.c
+        $B/i686-linux-android21-clang -shared -fPIC -O2 -o out/x86/libdriver.so jni/x86/c.c
+        $B/x86_64-linux-android21-clang -shared -fPIC -O2 -o out/x86_64/libdriver.so jni/x86_64/c.c
     - uses: actions/upload-artifact@v4
       with:
         name: pbdroid-video-libs
