@@ -7,14 +7,14 @@ jobs:
     - uses: actions/checkout@v4
     - name: Setup NDK
       run: |
-        wget -q https://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip
-        unzip -q android-ndk-r16b-linux-x86_64.zip
-        echo "NDK=$PWD/android-ndk-r16b" >> $GITHUB_ENV
+        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;25.2.9519653" > /dev/null
+        echo "NDK=$ANDROID_HOME/ndk/25.2.9519653" >> $GITHUB_ENV
     - name: Build
       run: |
-        B=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin
-        mkdir -p out/armeabi
-        $B/arm-linux-androideabi-gcc -shared -fPIC -O2 -o out/armeabi/libdriver.so jni/armeabi/c.c --sysroot=$NDK/sysroot -I$NDK/sysroot/usr/include -I$NDK/sysroot/usr/include/arm-linux-androideabi
+        B=$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin
+        mkdir -p out/armeabi-v7a
+        # Флаг -march=armv5te заставляет компилятор делать код совместимым со старыми ARM
+        $B/armv7a-linux-androideabi21-clang -shared -fPIC -O2 -march=armv5te -o out/armeabi-v7a/libdriver.so jni/armeabi-v7a/c.c
     - uses: actions/upload-artifact@v4
       with:
         name: pbdroid-video-libs
