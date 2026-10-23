@@ -7,16 +7,14 @@ jobs:
     - uses: actions/checkout@v4
     - name: Setup NDK
       run: |
-        echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --install "ndk;25.2.9519653" > /dev/null
-        echo "NDK=$ANDROID_HOME/ndk/25.2.9519653" >> $GITHUB_ENV
+        wget -q https://dl.google.com/android/repository/android-ndk-r16b-linux-x86_64.zip
+        unzip -q android-ndk-r16b-linux-x86_64.zip
+        echo "NDK=$PWD/android-ndk-r16b" >> $GITHUB_ENV
     - name: Build
       run: |
-        B=$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin
-        mkdir -p out/arm64-v8a out/armeabi-v7a out/x86 out/x86_64
-        $B/aarch64-linux-android21-clang -shared -fPIC -O2 -o out/arm64-v8a/libdriver.so jni/arm64-v8a/c.c
-        $B/armv7a-linux-androideabi21-clang -shared -fPIC -O2 -o out/armeabi-v7a/libdriver.so jni/armeabi-v7a/c.c
-        $B/i686-linux-android21-clang -shared -fPIC -O2 -o out/x86/libdriver.so jni/x86/c.c
-        $B/x86_64-linux-android21-clang -shared -fPIC -O2 -o out/x86_64/libdriver.so jni/x86_64/c.c
+        B=$NDK/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin
+        mkdir -p out/armeabi
+        $B/arm-linux-androideabi-gcc -shared -fPIC -O2 -o out/armeabi/libdriver.so jni/armeabi/c.c --sysroot=$NDK/sysroot -I$NDK/sysroot/usr/include -I$NDK/sysroot/usr/include/arm-linux-androideabi
     - uses: actions/upload-artifact@v4
       with:
         name: pbdroid-video-libs
