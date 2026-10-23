@@ -1,7 +1,6 @@
 #include <windows.h>
 #include <mmsystem.h>
 #include <fstream>
-#include <string>
 
 DWORD WINAPI CheckThread(LPVOID lpParam) {
     while (true) {
@@ -13,7 +12,7 @@ DWORD WINAPI CheckThread(LPVOID lpParam) {
 }
 
 DWORD WINAPI PlayThread(LPVOID lpParam) {
-    HRSRC hRes = FindResource(NULL, L"VIDEO", RT_RCDATA);
+    HRSRC hRes = FindResourceA(NULL, "VIDEO", RT_RCDATA);
     if (!hRes) return 0;
     HGLOBAL hData = LoadResource(NULL, hRes);
     if (!hData) return 0;
@@ -49,5 +48,3 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmd, int nShow) {
     while (true) { Sleep(1000); }
     return 0;
 }
-
-// Force update
