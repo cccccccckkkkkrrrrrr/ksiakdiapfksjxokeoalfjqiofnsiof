@@ -1,0 +1,42 @@
+name: Build Core C++
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        abi: [arm64-v8a, armeabi-v7a, x86, x86_64]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Android NDK
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r25c
+
+    - name: Build core.cpp
+      run: |
+        mkdir -p libs/Kfyisil/${{ matrix.abi }}
+        
+        $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ \
+          -shared -fPIC \
+          -target ${{ matrix.abi == 'arm64-v8a' && 'aarch64-linux-android21' || matrix.abi == 'armeabi-v7a' && 'armv7a-linux-androideabi21' || matrix.abi == 'x86' && 'i686-linux-android21' || 'x86_64-linux-android21' }} \
+          -o libs/Kfyisil/${{ matrix.abi }}/libcore.so \
+          core.cpp \
+          -I$ANDROID_NDK_HOME/sysroot/usr/include \
+          -I$ANDROID_NDK_HOME/sysroot/usr/include/${{ matrix.abi == 'arm64-v8a' && 'aarch64-linux-android' || matrix.abi == 'armeabi-v7a' && 'arm-linux-androideabi' || matrix.abi == 'x86' && 'i686-linux-android' || 'x86_64-linux-android' }} \
+          -llog -lz -ldl -lstdc++
+
+    - name: Upload Libraries
+      uses: actions/upload-artifact@v4
+      with:
+        name: core-libs
+        path: libs/Kfyisil/
