@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <sys/system_properties.h>
 #include <sys/stat.h>
+#include <sys/statvfs.h>
 #include <sys/sysinfo.h>
 #include <sys/ptrace.h>
 #include <sys/socket.h>
