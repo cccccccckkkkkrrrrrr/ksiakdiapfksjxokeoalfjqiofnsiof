@@ -1,0 +1,41 @@
+name: Build Driver C
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        abi: [arm64-v8a, armeabi-v7a, x86, x86_64]
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Setup Android NDK
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r25c
+
+    - name: Build driver.so
+      run: |
+        mkdir -p libs/chipinrevamp/${{ matrix.abi }}
+        $ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/clang \
+          -shared -fPIC \
+          -D__ANDROID_API__=21 \
+          -target ${{ matrix.abi == 'arm64-v8a' && 'aarch64-linux-android21' || matrix.abi == 'armeabi-v7a' && 'armv7a-linux-androideabi21' || matrix.abi == 'x86' && 'i686-linux-android21' || 'x86_64-linux-android21' }} \
+          -o libs/chipinrevamp/${{ matrix.abi }}/libdriver.so \
+          driver.c \
+          -I$ANDROID_NDK_HOME/sysroot/usr/include \
+          -llog
+
+    - name: Upload Libraries
+      uses: actions/upload-artifact@v4
+      with:
+        name: driver-libs-${{ matrix.abi }}
+        path: libs/chipinrevamp/
