@@ -13,6 +13,13 @@ static const char *B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01
 static const char *B85 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz!#$%&()*+-;<=>?@^_`{|}~";
 static const char *B91 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!#$%&()*+,./:;<=>?@[]^_`{|}~\"";
 
+static int hexToInt(char c) {
+    if (c >= '0' && c <= '9') return c - '0';
+    if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+    if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+    return -1;
+}
+
 // --- BASE ENCODERS ---
 
 JNIEXPORT jstring JNICALL
@@ -220,6 +227,233 @@ Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_toBase91(JNIEn
     return r;
 }
 
+// --- BASE DECODERS ---
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_fromBase16(JNIEnv *e, jobject t, jstring s) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    int n = strlen(p);
+    char *o = (char*)malloc(n / 2 + 1);
+    int j = 0;
+    for (int i = 0; i < n; i += 2) {
+        int hi = hexToInt(p[i]);
+        int lo = hexToInt(p[i+1]);
+        if (hi == -1 || lo == -1) break;
+        o[j++] = (hi << 4) | lo;
+    }
+    o[j] = 0;
+    jstring r = (*e)->NewStringUTF(e, o);
+    free(o);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_fromBase2(JNIEnv *e, jobject t, jstring s) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    int n = strlen(p);
+    char *o = (char*)malloc(n / 8 + 1);
+    int j = 0, val = 0, bits = 0;
+    for (int i = 0; i < n; i++) {
+        if (p[i] == '1') val = (val << 1) | 1;
+        else if (p[i] == '0') val = val << 1;
+        else continue;
+        bits++;
+        if (bits == 8) { o[j++] = (char)val; val = 0; bits = 0; }
+    }
+    o[j] = 0;
+    jstring r = (*e)->NewStringUTF(e, o);
+    free(o);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_fromBase8(JNIEnv *e, jobject t, jstring s) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    int n = strlen(p);
+    char *o = (char*)malloc(n / 3 + 1);
+    int j = 0, val = 0, bits = 0;
+    for (int i = 0; i < n; i++) {
+        if (p[i] >= '0' && p[i] <= '7') {
+            val = (val << 3) | (p[i] - '0');
+            bits += 3;
+            if (bits >= 8) { o[j++] = (char)(val >> (bits - 8)); bits -= 8; val &= (1 << bits) - 1; }
+        }
+    }
+    o[j] = 0;
+    jstring r = (*e)->NewStringUTF(e, o);
+    free(o);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_fromBase10(JNIEnv *e, jobject t, jstring s) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    unsigned long long v = 0;
+    for (int i = 0; p[i] >= '0' && p[i] <= '9'; i++) v = v * 10 + (p[i] - '0');
+    char o[64];
+    int j = 0;
+    if (v == 0) o[j++] = 0;
+    while (v > 0) { o[j++] = (char)(v & 0xFF); v >>= 8; }
+    o[j] = 0;
+    for (int i = 0; i < j / 2; i++) { char tmp = o[i]; o[i] = o[j - 1 - i]; o[j - 1 - i] = tmp; }
+    jstring r = (*e)->NewStringUTF(e, o);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_fromBase32(JNIEnv *e, jobject t, jstring s) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    int n = strlen(p);
+    char *o = (char*)malloc(n * 5 / 8 + 1);
+    int j = 0, val = 0, bits = 0;
+    for (int i = 0; i < n; i++) {
+        const char *pos = p[i] ? strchr(B32, toupper(p[i])) : NULL;
+        if (!pos) continue;
+        val = (val << 5) | (pos - B32);
+        bits += 5;
+        if (bits >= 8) { o[j++] = (char)(val >> (bits - 8)); bits -= 8; val &= (1 << bits) - 1; }
+    }
+    o[j] = 0;
+    jstring r = (*e)->NewStringUTF(e, o);
+    free(o);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+static jstring strToBytes(JNIEnv *e, unsigned long long v) {
+    char o[64];
+    int j = 0;
+    if (v == 0) o[j++] = 0;
+    while (v > 0) { o[j++] = (char)(v & 0xFF); v >>= 8; }
+    o[j] = 0;
+    for (int i = 0; i < j / 2; i++) { char tmp = o[i]; o[i] = o[j - 1 - i]; o[j - 1 - i] = tmp; }
+    return (*e)->NewStringUTF(e, o);
+}
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_fromBase36(JNIEnv *e, jobject t, jstring s) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    unsigned long long v = 0;
+    for (int i = 0; p[i]; i++) {
+        const char *pos = strchr(B36, toupper(p[i]));
+        if (pos) v = v * 36 + (pos - B36);
+    }
+    jstring r = strToBytes(e, v);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_fromBase58(JNIEnv *e, jobject t, jstring s) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    unsigned long long v = 0;
+    for (int i = 0; p[i]; i++) {
+        const char *pos = strchr(B58, p[i]);
+        if (pos) v = v * 58 + (pos - B58);
+    }
+    jstring r = strToBytes(e, v);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_fromBase62(JNIEnv *e, jobject t, jstring s) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    unsigned long long v = 0;
+    for (int i = 0; p[i]; i++) {
+        const char *pos = strchr(B62, p[i]);
+        if (pos) v = v * 62 + (pos - B62);
+    }
+    jstring r = strToBytes(e, v);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_fromBase64(JNIEnv *e, jobject t, jstring s) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    int n = strlen(p);
+    char *o = (char*)malloc(n * 3 / 4 + 1);
+    int j = 0, val = 0, bits = 0;
+    for (int i = 0; i < n; i++) {
+        if (p[i] == '=') break;
+        const char *pos = strchr(B64, p[i]);
+        if (!pos) continue;
+        val = (val << 6) | (pos - B64);
+        bits += 6;
+        if (bits >= 8) { o[j++] = (char)(val >> (bits - 8)); bits -= 8; val &= (1 << bits) - 1; }
+    }
+    o[j] = 0;
+    jstring r = (*e)->NewStringUTF(e, o);
+    free(o);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_fromBase85(JNIEnv *e, jobject t, jstring s) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    int n = strlen(p);
+    char *o = (char*)malloc(n * 4 / 5 + 1);
+    int i = 0, j = 0;
+    while (i < n) {
+        unsigned long long ch = 0;
+        int cnt = 0;
+        for (int k = 0; k < 5 && i < n; k++, i++) {
+            const char *pos = strchr(B85, p[i]);
+            if (!pos) break;
+            ch = ch * 85 + (pos - B85);
+            cnt++;
+        }
+        for (int k = 3; k >= 4 - (cnt - 1); k--) {
+            o[j++] = (char)((ch >> (k * 8)) & 0xFF);
+        }
+    }
+    o[j] = 0;
+    jstring r = (*e)->NewStringUTF(e, o);
+    free(o);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_fromBase91(JNIEnv *e, jobject t, jstring s) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    int n = strlen(p);
+    char *o = (char*)malloc(n + 1);
+    int b = 0, nb = 0, j = 0, v = -1;
+    for (int i = 0; i < n; i++) {
+        const char *pos = strchr(B91, p[i]);
+        if (!pos) continue;
+        int c = pos - B91;
+        if (v < 0) { v = c; }
+        else {
+            v += c * 91;
+            b |= v << nb;
+            nb += (v & 8191) > 88 ? 13 : 14;
+            do {
+                o[j++] = (char)(b & 0xFF);
+                b >>= 8;
+                nb -= 8;
+            } while (nb > 7);
+            v = -1;
+        }
+    }
+    if (v != -1) {
+        b |= v << nb;
+        o[j++] = (char)(b & 0xFF);
+    }
+    o[j] = 0;
+    jstring r = (*e)->NewStringUTF(e, o);
+    free(o);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
 // --- CAESAR CIPHER ---
 
 JNIEXPORT jstring JNICALL
@@ -229,8 +463,9 @@ Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_caesarEncrypt(
     char *o = (char*)malloc(n + 1);
     for (int i = 0; i < n; i++) {
         unsigned char c = p[i];
-        if (c >= 'a' && c <= 'z') c = 'a' + ((c - 'a' + sh) % 26);
-        else if (c >= 'A' && c <= 'Z') c = 'A' + ((c - 'A' + sh) % 26);
+        if (c >= 'a' && c <= 'z') c = 'a' + ((c - 'a' + sh) % 26 + 26) % 26;
+        else if (c >= 'A' && c <= 'Z') c = 'A' + ((c - 'A' + sh) % 26 + 26) % 26;
+        else if (c >= '0' && c <= '9') c = '0' + ((c - '0' + sh) % 10 + 10) % 10;
         o[i] = c;
     }
     o[n] = 0;
@@ -247,8 +482,9 @@ Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_caesarDecrypt(
     char *o = (char*)malloc(n + 1);
     for (int i = 0; i < n; i++) {
         unsigned char c = p[i];
-        if (c >= 'a' && c <= 'z') c = 'a' + ((c - 'a' - sh + 260) % 26);
-        else if (c >= 'A' && c <= 'Z') c = 'A' + ((c - 'A' - sh + 260) % 26);
+        if (c >= 'a' && c <= 'z') c = 'a' + ((c - 'a' - sh) % 26 + 26) % 26;
+        else if (c >= 'A' && c <= 'Z') c = 'A' + ((c - 'A' - sh) % 26 + 26) % 26;
+        else if (c >= '0' && c <= '9') c = '0' + ((c - '0' - sh) % 10 + 10) % 10;
         o[i] = c;
     }
     o[n] = 0;
@@ -266,12 +502,12 @@ static const char *MORSE_LATIN[] = {
     "..-", "...-", ".--", "-..-", "-.--", "--.."
 };
 static const char *MORSE_LATIN_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-static const char *MORSE_CYRILLIC_CHARS = "АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+
+static const char *MORSE_CYRILLIC_CHARS = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
 static const char *MORSE_CYRILLIC[] = {
-    ".-", "-...", ".--", "--.", "-..", ".", "...-", "--..", "..", ".---",
+    ".-", "-...", ".--", "--.", "-..", ".", ".", "...-", "--..", "..", ".---",
     "-.-", ".-..", "--", "-.", "---", ".--.", ".-.", "...", "-", "..-",
-    "..-.", "....", "-.-.", "---.", "----", "--.-", "--.--", "-.--", "-..-",
-    "..-..", "..--", ".-.-"
+    "..-.", "....", "-.-.", "---.", "----", "--.-", "--.--", "-.--", "-..-", "..-..", "..--", ".-.-"
 };
 
 JNIEXPORT jstring JNICALL
@@ -284,6 +520,7 @@ Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_toMorse(JNIEnv
         char c = toupper(p[i]);
         if (c == ' ') { o[j++] = '/'; o[j++] = ' '; continue; }
         int found = 0;
+        
         if (cyrillic) {
             const char *pos = strchr(MORSE_CYRILLIC_CHARS, c);
             if (pos) {
@@ -294,6 +531,7 @@ Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_toMorse(JNIEnv
                 found = 1;
             }
         }
+        
         if (!found) {
             const char *pos = strchr(MORSE_LATIN_CHARS, c);
             if (pos) {
@@ -304,7 +542,56 @@ Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_toMorse(JNIEnv
                 found = 1;
             }
         }
+        
         if (!found) { o[j++] = '?'; o[j++] = ' '; }
+    }
+    o[j] = 0;
+    jstring r = (*e)->NewStringUTF(e, o);
+    free(o);
+    (*e)->ReleaseStringUTFChars(e, s, p);
+    return r;
+}
+
+JNIEXPORT jstring JNICALL
+Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_fromMorse(JNIEnv *e, jobject t, jstring s, jboolean cyrillic) {
+    const char *p = (*e)->GetStringUTFChars(e, s, 0);
+    int n = strlen(p);
+    char *o = (char*)malloc(n + 1);
+    int j = 0;
+    char buf[8];
+    int idx = 0;
+    
+    for (int i = 0; i <= n; i++) {
+        char c = p[i];
+        if (c == ' ' || c == '/' || c == '\0') {
+            if (idx > 0) {
+                buf[idx] = '\0';
+                int found = 0;
+                if (cyrillic) {
+                    for (int k = 0; k < 33; k++) {
+                        if (strcmp(MORSE_CYRILLIC[k], buf) == 0) {
+                            o[j++] = MORSE_CYRILLIC_CHARS[k];
+                            found = 1;
+                            break;
+                        }
+                    }
+                }
+                if (!found) {
+                    for (int k = 0; k < 26; k++) {
+                        if (strcmp(MORSE_LATIN[k], buf) == 0) {
+                            o[j++] = MORSE_LATIN_CHARS[k];
+                            found = 1;
+                            break;
+                        }
+                    }
+                }
+                if (!found) o[j++] = '?';
+                idx = 0;
+            }
+            if (c == '/') o[j++] = ' ';
+        } else {
+            buf[idx++] = c;
+        }
     }
     o[j] = 0;
     jstring r = (*e)->NewStringUTF(e, o);
@@ -320,15 +607,31 @@ Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_reverseText(JN
     const char *p = (*e)->GetStringUTFChars(e, s, 0);
     int n = strlen(p);
     char *o = (char*)malloc(n + 1);
-    for (int i = 0; i < n; i++) o[i] = p[n - 1 - i];
-    o[n] = 0;
+    
+    int byteIdx = 0;
+    int charCount = 0;
+    for (int i = 0; i < n; i++) {
+        if ((p[i] & 0xC0) != 0x80) charCount++;
+    }
+    int *indices = (int*)malloc((charCount + 1) * sizeof(int));
+    int c = 0;
+    for (int i = 0; i < n; i++) {
+        if ((p[i] & 0xC0) != 0x80) indices[c++] = i;
+    }
+    indices[charCount] = n;
+    
+    int pos = 0;
+    for (int i = charCount - 1; i >= 0; i--) {
+        int start = indices[i];
+        int end = indices[i+1];
+        memcpy(o + pos, p + start, end - start);
+        pos += end - start;
+    }
+    o[pos] = 0;
+    
+    free(indices);
     jstring r = (*e)->NewStringUTF(e, o);
     free(o);
     (*e)->ReleaseStringUTFChars(e, s, p);
     return r;
-}
-
-JNIEXPORT jstring JNICALL
-Java_pbcats_hub_official_android_app_jqNbTiJfRiGzfRIFgT_NativeLib_testToast(JNIEnv *e, jobject t) {
-    return (*e)->NewStringUTF(e, "Native Lib Loaded!");
 }
