@@ -16,7 +16,7 @@ volatile bool g_Running = true;
 HHOOK g_HookKb = NULL;
 HHOOK g_HookMs = NULL;
 HWND g_Wnd = NULL;
-WAVEOUT g_WaveOut = NULL;
+HWAVEOUT g_WaveOut = NULL;
 
 LRESULT CALLBACK KbHook(int nCode, WPARAM wParam, LPARAM lParam) {
     if (nCode == HC_ACTION) {
